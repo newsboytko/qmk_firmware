@@ -9,11 +9,11 @@
 // entirely and just use numbers.
 enum layer_id
 {
-  _BL_WINDOWS,
-  _BL_MAC,
-  _BL_MAX,
-  _FL = _BL_MAX,
-  _RL,
+	_DL_WINDOWS,
+	_DL_MAC,
+	_DL_MAX,
+	_FL = _DL_MAX,
+	_RL,
 };
 
 enum function_id {
@@ -24,7 +24,7 @@ enum function_id {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-  /* Keymap _BL_WINDOWS: (Base Layer) Default Layer for Windows
+  /* Keymap _DL_WINDOWS: (Base Layer) Default Layer for Windows
    * ,------------------------------------------------------------------------.
    * |Esc~|   1|   2|   3|   4|   5|   6|   7|   8|   9|   0|   -|   =|Backspc|
    * |------------------------------------------------------------------------|
@@ -43,7 +43,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *                |   FN   |         | Shift  |
    *                `--------'         `--------'
    */
-[_BL_WINDOWS] = KEYMAP_ANSI_FOOTSWITCHES(
+[_DL_WINDOWS] = KEYMAP_ANSI_FOOTSWITCHES(
   F(SHIFT_ESC),    KC_1,    KC_2,    KC_3,   KC_4,    KC_5,    KC_6,    KC_7,     KC_8,    KC_9,   KC_0,    KC_MINS, KC_EQL,  KC_BSPC, \
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
@@ -70,7 +70,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *                |   FN   |         | Shift  |
    *                `--------'         `--------'
    */
-[_BL_MAC] = KEYMAP_ANSI_FOOTSWITCHES(
+[_DL_MAC] = KEYMAP_ANSI_FOOTSWITCHES(
   F(SHIFT_ESC),    KC_1,    KC_2,    KC_3,   KC_4,    KC_5,    KC_6,    KC_7,     KC_8,    KC_9,   KC_0,    KC_MINS, KC_EQL,  KC_BSPC, \
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
@@ -151,7 +151,14 @@ const uint16_t PROGMEM fn_actions[] = {
 #define MODS_SHIFT_MASK  (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
 
 // used for NEXT_DEFAULT_LAYER
-static uint16_t current_default_layer = 0;
+extern uint32_t default_layer_state;
+#define MAX_DEFAULT_LAYER_STATE (1UL << _DL_MAX)
+
+void persistent_default_layer_set(uint16_t default_layer)
+{
+    eeconfig_update_default_layer(default_layer);
+    default_layer_set(default_layer);
+}
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
     uint8_t shift_pressed;
@@ -180,9 +187,22 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         }
         case NEXT_DEFAULT_LAYER:
         {
-        	current_default_layer = (current_default_layer + 1) % _BL_MAX;
-        	default_layer_set(1UL << current_default_layer);
-            break;
+        	if (record->event.pressed)
+        	{
+        		if (default_layer_state == 0)
+	        	{
+	        		default_layer_state = 1;
+	        	}
+	        	default_layer_state = (default_layer_state << 1) & ~(1UL << _DL_MAX);
+	        	dprintf("default_layer_state: 0x%08X\n", default_layer_state);
+	        	persistent_default_layer_set(default_layer_state);
+        	}
+        	break;
         }
     }
+}
+
+void matrix_init_user()
+{
+	debug_enable = true;
 }
