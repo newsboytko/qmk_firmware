@@ -2,6 +2,7 @@
 
 // Readability
 #define _______ KC_TRNS
+#define XXXXXXX KC_NO
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
 // The underscores don't mean anything - you can have a layer called STUFF or any other name.
@@ -9,23 +10,27 @@
 // entirely and just use numbers.
 enum layer_id
 {
-	_DL_WINDOWS,
-	_DL_MAC,
-	_DL_KIDS,
-	_DL_MAX,
-	_FL = _DL_MAX,
-	_RL,
+    _DL_WINDOWS,
+    _DL_MAC,
+    _DL_KIDS,
+    _DL_MAX,
+    _FL = _DL_MAX,
+    _RL,
+    _GL_MAC,
+    _GL_MAC_GUITAB,
 };
 
 enum function_id {
     SHIFT_ESC,
     NEXT_DEFAULT_LAYER,
+    MAC_GUITAB_ENABLE,
+    MAC_GUITAB_DISABLE,
 };
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-  /* Keymap _DL_WINDOWS: (Base Layer) Default Layer for Windows
+  /* Keymap _DL_WINDOWS: Default Layer for Windows
    * ,------------------------------------------------------------------------.
    * |Esc~|   1|   2|   3|   4|   5|   6|   7|   8|   9|   0|   -|   =|Backspc|
    * |------------------------------------------------------------------------|
@@ -52,7 +57,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             KC_RALT, MO(_RL), MO(_FL), KC_RCTL, \
   MO(_FL), KC_LSFT),
 
-  /* Keymap _BL: (Base Layer) Default Layer for Mac
+  /* Keymap _DL_MAC: Default Layer for Mac
    * ,------------------------------------------------------------------------.
    * |Esc~|   1|   2|   3|   4|   5|   6|   7|   8|   9|   0|   -|   =|Backspc|
    * |------------------------------------------------------------------------|
@@ -62,7 +67,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |Shift    |   Z|   X|   C|   V|   B|   N|   M|   ,|   .|   /|      Shift |
    * |------------------------------------------------------------------------|
-   * |Ctrl | Alt | Gui |            Space             | Gui | RL  | FN  | Ctrl|
+   * |Ctrl | Alt | Gui |            Space             | GL  | RL  | FN  | Ctrl|
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -76,10 +81,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             KC_RGUI, MO(_RL), MO(_FL), KC_RCTL, \
+  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             MO(_GL_MAC), MO(_RL), MO(_FL), KC_RCTL, \
   MO(_FL), KC_LSFT),
 
-  /* Keymap _BL: (Base Layer) Default Layer for Mac
+  /* Keymap _DL_KIDS: Default layer for child's play
    * ,------------------------------------------------------------------------.
    * |`   |   1|   2|   3|   4|   5|   6|   7|   8|   9|   0|   -|   =|Backspc|
    * |------------------------------------------------------------------------|
@@ -143,7 +148,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |         |RGB |Mode|Hue+|Hue-|Sat+|Sat-|Val+|Val-|    |    |            |
    * |------------------------------------------------------------------------|
-   * |     |     |     |                              |     |     |     |     |
+   * |     | DL+ |     |                              |     |     |     |     |
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -154,25 +159,96 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 [_RL] = KEYMAP_ANSI_FOOTSWITCHES(
   #ifdef RGBLIGHT_ENABLE
-  _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, BL_DEC,  BL_INC,  BL_TOGG, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
   _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, RGB_VAI, RGB_VAD, _______, _______,                   _______, \
   _______, F(NEXT_DEFAULT_LAYER), _______,                _______,                          _______, _______, _______, _______, \
-  _______, _______),
+  _______, _______
   #else
   _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, BL_DEC,  BL_INC,  BL_TOGG, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
   _______, F(NEXT_DEFAULT_LAYER), _______,                _______,                          _______, _______, _______, _______, \
-  _______, _______),
+  _______, _______
   #endif
+  ),
+
+/* Keymap _GL_MAC: GUI Layer for Mac
+   * ,------------------------------------------------------------------------.
+   * |Pwr |    |    |    |    |    |    |    |    |    |    |    |    | Close |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |Dsk-|Dsk+| GTab|
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |SnpL|SnpR| Maximize|
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+[_GL_MAC] = KEYMAP_ANSI_FOOTSWITCHES(
+  KC_PWR,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_W), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(KC_LEFT), LCTL(KC_RGHT), F(MAC_GUITAB_ENABLE), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCAG(KC_LEFT), LCAG(KC_RGHT), LCAG(KC_M), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
+  _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
+  _______, _______), 
+
+/* Keymap _GL_MAC_GUITAB: GUI Layer for Mac "Gui-Tab" functionality
+   * ,------------------------------------------------------------------------.
+   * |    |    |    |    |    |    |    |    |    |    |    |    |    |       |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+[_GL_MAC_GUITAB] = KEYMAP_ANSI_FOOTSWITCHES(
+  KC_ESC, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, LSFT(KC_TAB), KC_TAB, F(MAC_GUITAB_DISABLE), \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_TAB, LSFT(KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX,          F(MAC_GUITAB_DISABLE), \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX,                          F(MAC_GUITAB_DISABLE),                XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX),
+
+#if 0
+Template:
+
+[] = KEYMAP_ANSI_FOOTSWITCHES(
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
+  _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
+  _______, _______),
+#endif
+
 };
+
 
 const uint16_t PROGMEM fn_actions[] = {
   [SHIFT_ESC] = ACTION_FUNCTION(SHIFT_ESC),
   [NEXT_DEFAULT_LAYER] = ACTION_FUNCTION(NEXT_DEFAULT_LAYER),
+  [MAC_GUITAB_ENABLE] = ACTION_FUNCTION(MAC_GUITAB_ENABLE),
+  [MAC_GUITAB_DISABLE] = ACTION_FUNCTION(MAC_GUITAB_DISABLE),
 };
 
 // Used for SHIFT_ESC
@@ -215,22 +291,45 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         }
         case NEXT_DEFAULT_LAYER:
         {
-        	if (record->event.pressed)
-        	{
-        		if (default_layer_state == 0)
-	        	{
-	        		default_layer_state = 1;
-	        	}
-	        	default_layer_state = (default_layer_state << 1) & ~(1UL << _DL_MAX);
-	        	dprintf("default_layer_state: 0x%08X\n", default_layer_state);
-	        	persistent_default_layer_set(default_layer_state);
-        	}
-        	break;
+            if (record->event.pressed)
+            {
+                if (default_layer_state == 0)
+                {
+                    default_layer_state = 1;
+                }
+                default_layer_state = (default_layer_state << 1) & ~(1UL << _DL_MAX);
+                dprintf("default_layer_state: 0x%08X\n", default_layer_state);
+                persistent_default_layer_set(default_layer_state);
+            }
+            break;
+        }
+        case MAC_GUITAB_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                register_code(KC_LGUI);
+                register_code(KC_TAB);
+                unregister_code(KC_TAB);
+                layer_on(_GL_MAC_GUITAB);
+            }
+            
+            break;
+        }
+        case MAC_GUITAB_DISABLE:
+        {
+            if (record->event.pressed)
+            {
+                unregister_code(KC_LGUI);
+                layer_off(_GL_MAC_GUITAB);
+                layer_off(_GL_MAC);
+            }
+            
+            break;
         }
     }
 }
 
 void matrix_init_user()
 {
-	debug_enable = true;
+    debug_enable = true;
 }
