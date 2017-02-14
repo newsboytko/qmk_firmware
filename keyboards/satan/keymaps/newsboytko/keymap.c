@@ -16,15 +16,21 @@ enum layer_id
     _DL_MAX,
     _FL = _DL_MAX,
     _RL,
+    _GL_WINDOWS,
+    _GL_WINDOWS_TASKSWITCH,
     _GL_MAC,
-    _GL_MAC_GUITAB,
+    _GL_MAC_TASKSWITCH,
 };
 
 enum function_id {
     SHIFT_ESC,
     NEXT_DEFAULT_LAYER,
-    MAC_GUITAB_ENABLE,
-    MAC_GUITAB_DISABLE,
+    WINDOWS_TASKSWITCH_ENABLE,
+    WINDOWS_TASKSWITCH_SELECT,
+    WINDOWS_TASKSWITCH_CANCEL,
+    MAC_TASKSWITCH_ENABLE,
+    MAC_TASKSWITCH_SELECT,
+    MAC_TASKSWITCH_CANCEL,
 };
 
 
@@ -54,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             KC_RALT, MO(_RL), MO(_FL), KC_RCTL, \
+  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             MO(_GL_WINDOWS), MO(_RL), MO(_FL), KC_RCTL, \
   MO(_FL), KC_LSFT),
 
   /* Keymap _DL_MAC: Default Layer for Mac
@@ -175,6 +181,61 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   #endif
   ),
 
+/* Keymap _GL_WINDOWS: GUI Layer for Windows
+   * ,------------------------------------------------------------------------.
+   * |Lock|    |    |    |    |    |    |    |    |    |    |    |    | Close |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |Dsk-|Dsk+| Task|
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |SnpL|SnpR| Maximize|
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+[_GL_WINDOWS] = KEYMAP_ANSI_FOOTSWITCHES(
+  LGUI(KC_L),  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LALT(KC_F4), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT)), F(WINDOWS_TASKSWITCH_ENABLE), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_LEFT), LGUI(KC_RGHT), LGUI(KC_UP), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
+  _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
+  _______, _______), 
+
+/* Keymap _GL_WINDOWS_TASKSWITCH: GUI Layer for Windows Task Switcher
+   * ,------------------------------------------------------------------------.
+   * |Cancel|    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |Prev|Next| Sel |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |Next|Prev|    |    |    |    |  Select |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |            Select            |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+[_GL_WINDOWS_TASKSWITCH] = KEYMAP_ANSI_FOOTSWITCHES(
+  F(WINDOWS_TASKSWITCH_CANCEL), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, LSFT(KC_TAB), KC_TAB, F(WINDOWS_TASKSWITCH_SELECT), \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_TAB, LSFT(KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX,          F(WINDOWS_TASKSWITCH_SELECT), \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX,                          F(WINDOWS_TASKSWITCH_SELECT),                XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX),
+
+
 /* Keymap _GL_MAC: GUI Layer for Mac
    * ,------------------------------------------------------------------------.
    * |Pwr |    |    |    |    |    |    |    |    |    |    |    |    | Close |
@@ -196,23 +257,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 [_GL_MAC] = KEYMAP_ANSI_FOOTSWITCHES(
   KC_PWR,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_W), \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(KC_LEFT), LCTL(KC_RGHT), F(MAC_GUITAB_ENABLE), \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(KC_LEFT), LCTL(KC_RGHT), F(MAC_TASKSWITCH_ENABLE), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCAG(KC_LEFT), LCAG(KC_RGHT), LCAG(KC_M), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
   _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
   _______, _______), 
 
-/* Keymap _GL_MAC_GUITAB: GUI Layer for Mac "Gui-Tab" functionality
+/* Keymap _GL_MAC_TASKSWITCH: GUI Layer for Mac Task Switcher
    * ,------------------------------------------------------------------------.
-   * |    |    |    |    |    |    |    |    |    |    |    |    |    |       |
+   * |Cancel|    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
-   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |      |    |    |    |    |    |    |    |    |    |    |Prev|Next| Sel |
    * |------------------------------------------------------------------------|
-   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |       |    |    |    |    |    |Next|Prev|    |    |    |    |  Select |
    * |------------------------------------------------------------------------|
    * |         |    |    |    |    |    |    |    |    |    |    |            |
    * |------------------------------------------------------------------------|
-   * |     |     |     |                              |     |     |     |     |
+   * |     |     |     |            Select            |     |     |     |     |
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -221,12 +282,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *                |        |         |        |
    *                `--------'         `--------'
    */
-[_GL_MAC_GUITAB] = KEYMAP_ANSI_FOOTSWITCHES(
-  KC_ESC, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, LSFT(KC_TAB), KC_TAB, F(MAC_GUITAB_DISABLE), \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_TAB, LSFT(KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX,          F(MAC_GUITAB_DISABLE), \
+[_GL_MAC_TASKSWITCH] = KEYMAP_ANSI_FOOTSWITCHES(
+  F(MAC_TASKSWITCH_CANCEL), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, LSFT(KC_TAB), KC_TAB, F(MAC_TASKSWITCH_SELECT), \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_TAB, LSFT(KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX,          F(MAC_TASKSWITCH_SELECT), \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX,                          F(MAC_GUITAB_DISABLE),                XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX,                          F(MAC_TASKSWITCH_SELECT),                XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX),
 
 #if 0
@@ -247,8 +308,12 @@ Template:
 const uint16_t PROGMEM fn_actions[] = {
   [SHIFT_ESC] = ACTION_FUNCTION(SHIFT_ESC),
   [NEXT_DEFAULT_LAYER] = ACTION_FUNCTION(NEXT_DEFAULT_LAYER),
-  [MAC_GUITAB_ENABLE] = ACTION_FUNCTION(MAC_GUITAB_ENABLE),
-  [MAC_GUITAB_DISABLE] = ACTION_FUNCTION(MAC_GUITAB_DISABLE),
+  [WINDOWS_TASKSWITCH_ENABLE] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_ENABLE),
+  [WINDOWS_TASKSWITCH_SELECT] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_SELECT),
+  [WINDOWS_TASKSWITCH_CANCEL] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_CANCEL),
+  [MAC_TASKSWITCH_ENABLE] = ACTION_FUNCTION(MAC_TASKSWITCH_ENABLE),
+  [MAC_TASKSWITCH_SELECT] = ACTION_FUNCTION(MAC_TASKSWITCH_SELECT),
+  [MAC_TASKSWITCH_CANCEL] = ACTION_FUNCTION(MAC_TASKSWITCH_CANCEL),
 };
 
 // Used for SHIFT_ESC
@@ -303,24 +368,73 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             }
             break;
         }
-        case MAC_GUITAB_ENABLE:
+        case WINDOWS_TASKSWITCH_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                register_code(KC_LALT);
+                register_code(KC_TAB);
+                unregister_code(KC_TAB);
+                layer_on(_GL_WINDOWS_TASKSWITCH);
+            }
+            
+            break;
+        }
+        case WINDOWS_TASKSWITCH_SELECT:
+        {
+            if (record->event.pressed)
+            {
+                unregister_code(KC_LALT);
+                layer_off(_GL_WINDOWS_TASKSWITCH);
+                layer_off(_GL_WINDOWS);
+            }
+            
+            break;
+        }
+        case WINDOWS_TASKSWITCH_CANCEL:
+        {
+            if (record->event.pressed)
+            {
+                add_key(KC_ESC);
+                send_keyboard_report();
+                unregister_code(KC_LALT);
+                layer_off(_GL_WINDOWS_TASKSWITCH);
+                layer_off(_GL_WINDOWS);
+            }
+            
+            break;
+        }
+        case MAC_TASKSWITCH_ENABLE:
         {
             if (record->event.pressed)
             {
                 register_code(KC_LGUI);
                 register_code(KC_TAB);
                 unregister_code(KC_TAB);
-                layer_on(_GL_MAC_GUITAB);
+                layer_on(_GL_MAC_TASKSWITCH);
             }
             
             break;
         }
-        case MAC_GUITAB_DISABLE:
+        case MAC_TASKSWITCH_SELECT:
         {
             if (record->event.pressed)
             {
                 unregister_code(KC_LGUI);
-                layer_off(_GL_MAC_GUITAB);
+                layer_off(_GL_MAC_TASKSWITCH);
+                layer_off(_GL_MAC);
+            }
+            
+            break;
+        }
+        case MAC_TASKSWITCH_CANCEL:
+        {
+            if (record->event.pressed)
+            {
+                add_key(KC_ESC);
+                send_keyboard_report();
+                unregister_code(KC_LGUI);
+                layer_off(_GL_MAC_TASKSWITCH);
                 layer_off(_GL_MAC);
             }
             
