@@ -33,6 +33,10 @@ enum function_id {
     MAC_TASKSWITCH_CANCEL,
 };
 
+enum macro_id {
+    SD_SUBMIT_YOLO,
+};
+
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -165,7 +169,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 [_RL] = KEYMAP_ANSI_FOOTSWITCHES(
   #ifdef RGBLIGHT_ENABLE
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, MI_OFF, MI_ON, RESET,   \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, BL_DEC,  BL_INC,  BL_TOGG, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
   _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, RGB_VAI, RGB_VAD, _______, _______,                   _______, \
@@ -201,7 +205,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *                `--------'         `--------'
    */
 [_GL_WINDOWS] = KEYMAP_ANSI_FOOTSWITCHES(
-  LGUI(KC_L),  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LALT(KC_F4), \
+  LGUI(KC_L), M(SD_SUBMIT_YOLO), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LALT(KC_F4), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT)), F(WINDOWS_TASKSWITCH_ENABLE), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_LEFT), LGUI(KC_RGHT), LGUI(KC_UP), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
@@ -443,7 +447,29 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
     }
 }
 
+const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
+{
+    switch(id)
+    {
+        case SD_SUBMIT_YOLO: // this would trigger when you hit a key mapped as M(SD_SUBMIT_YOLO)
+        {
+            if (record->event.pressed)
+            {
+                return MACRO( I(20), 
+                    T(S), T(D), T(SPACE), 
+                    T(S), T(U), T(B), T(M), T(I), T(T), T(SPACE), 
+                    T(MINS), D(LSFT), T(C), U(LSFT), T(SPACE), 
+                    D(LSFT), T(QUOT), T(Y), T(O), T(L), T(O), T(QUOT), U(LSFT), T(ENT), 
+                    END );
+            }
+            break;
+        }
+    };
+
+    return MACRO_NONE;
+}
+
 void matrix_init_user()
 {
-    debug_enable = true;
+    //debug_enable = true;
 }
