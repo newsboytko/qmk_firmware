@@ -170,14 +170,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 [_RL] = KEYMAP_ANSI_FOOTSWITCHES(
   #ifdef RGBLIGHT_ENABLE
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, MI_OFF, MI_ON, RESET,   \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, BL_DEC,  BL_INC,  BL_TOGG, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          TG(_ML), \
   _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, RGB_VAI, RGB_VAD, _______, _______,                   _______, \
   _______, F(NEXT_DEFAULT_LAYER), _______,                _______,                          _______, _______, _______, _______, \
   _______, _______
   #else
-  _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RESET,   \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, BL_DEC,  BL_INC,  BL_TOGG, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          TG(_ML), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
@@ -319,8 +319,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   TG(_ML), MI_VEL_1, MI_VEL_2, MI_VEL_3, MI_VEL_4, MI_VEL_5, MI_VEL_6, MI_VEL_7, MI_VEL_8, MI_VEL_9, MI_VEL_10, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_CHU,  XXXXXXX, MI_Cs,   MI_Ds,   XXXXXXX, MI_Fs,   MI_Gs,   MI_As,   XXXXXXX, MI_Cs_1, MI_Ds_1, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           XXXXXXX, \
-  _______, MI_OCTD, MI_OCTU, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   _______, \
-  _______, _______, _______,                          XXXXXXX,                              _______, _______, _______, _______, \
+  MI_SUS,  MI_OCTD, MI_OCTU, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   MI_SUS, \
+  _______, _______, _______,                          MI_OFF,                               _______, _______, _______, _______, \
   _______, _______),
 
 #if 0
