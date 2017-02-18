@@ -299,11 +299,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * ,------------------------------------------------------------------------.
    * | Exit |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
-   * |      |    | C# | D# |    | F# | G# | A# |    | C# | D# |    |    |     |
+   * |  Ch+ |    | C# | D# |    | F# | G# | A# |    | C# | D# |    |    |     |
    * |------------------------------------------------------------------------|
    * |  Mod  | C  | D  | E  | F  | G  | A  | B  | C  | D  | E  | F  |         |
    * |------------------------------------------------------------------------|
-   * | Sustain |Oct-|Oct+|Mod-|Mod+|    |    |    |    |    |    |   Sustain  |
+   * | Sustain |Oct-|Oct+|Mod-|Mod+|    |    |    |Tns-|Tns+|Tns0|   Sustain  |
    * |------------------------------------------------------------------------|
    * |     |     |     |         All notes off        |     |     |     |     |
    * `------------------------------------------------------------------------'
@@ -319,7 +319,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   TG(_ML), MI_VEL_1, MI_VEL_2, MI_VEL_3, MI_VEL_4, MI_VEL_5, MI_VEL_6, MI_VEL_7, MI_VEL_8, MI_VEL_9, MI_VEL_10, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_CHU,  XXXXXXX, MI_Cs,   MI_Ds,   XXXXXXX, MI_Fs,   MI_Gs,   MI_As,   XXXXXXX, MI_Cs_1, MI_Ds_1, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           XXXXXXX, \
-  MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   MI_SUS, \
+  MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, MI_TRNSD, MI_TRNSU, MI_TRNS_0,             MI_SUS, \
   _______, _______, _______,                          MI_OFF,                               _______, _______, _______, _______, \
   _______, _______),
 
