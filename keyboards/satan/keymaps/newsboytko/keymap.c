@@ -1,6 +1,7 @@
 #include "satan.h"
 #include "process_midi.h"
 #include "rgblight.h"
+#include "timer.h"
 
 // Readability
 #define _______ KC_TRNS
@@ -52,6 +53,7 @@ enum function_id {
     ONSTAGE_BRIGHTNESS,
     ONSTAGE_BRIGHTD = ONSTAGE_BRIGHTNESS,
     ONSTAGE_BRIGHTU,
+    ONSTAGE_PLAY_NEXT_SONG,
 };
 
 enum macro_id {
@@ -345,11 +347,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Keymap _ML_ONSTAGE: MIDI Layer for performance on stage
    * ,------------------------------------------------------------------------.
-   * | Exit | C  | C# | D  | D# | E  | F  | F# | G  | G# | A  |    |    |     |
+   * | Exit | C  | C# | D  | D# | E  | F  | F# | G  | G# | A  |Brt-|Brt+|     |
    * |------------------------------------------------------------------------|
    * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
-   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |       |    |    |    |    |    |    |    |    |    |    |    |Play Next|
    * |------------------------------------------------------------------------|
    * |  Shift  |    |    |    |    |    |    |    |    |    |    |    Shift   |
    * |------------------------------------------------------------------------|
@@ -357,19 +359,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
-   *                ,--------.         ,--------.
-   *                |        |         |        |
-   *                |        |         |        |
-   *                `--------'         `--------'
+   *                ,---------.         ,--------.
+   *                |Play Next|         |        |
+   *                |         |         |        |
+   *                `---------'         `--------'
    */
 
 [_ML_ONSTAGE] = KEYMAP_ANSI_FOOTSWITCHES(
   TG(_ML_ONSTAGE), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), F(ONSTAGE_BRIGHTD), F(ONSTAGE_BRIGHTU), XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          F(ONSTAGE_PLAY_NEXT_SONG), \
   KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_RSFT, \
-  F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, XXXXXXX),
+  F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
+  F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
 
 
 //
@@ -432,6 +434,7 @@ const uint16_t PROGMEM fn_actions[] = {
   [ONSTAGE_SELECT_SONG_10] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 9),
   [ONSTAGE_BRIGHTD] = ACTION_FUNCTION(ONSTAGE_BRIGHTD),
   [ONSTAGE_BRIGHTU] = ACTION_FUNCTION(ONSTAGE_BRIGHTU),
+  [ONSTAGE_PLAY_NEXT_SONG] = ACTION_FUNCTION(ONSTAGE_PLAY_NEXT_SONG),
 };
 
 // Used for SHIFT_ESC
@@ -450,12 +453,7 @@ void persistent_default_layer_set(uint16_t default_layer)
 #define MIDI_ONSTAGE_SONG_COUNT 10
 #define MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT 9
 #define MIDI_ONSTAGE_COLOR_VAL_STEP 0.1
-
-// typedef struct {
-//     uint8_t r;
-//     uint8_t g;
-//     uint8_t b;
-// } rgb_color_t;
+#define MIDI_ONSTAGE_PLAY_NEXT_SONG_TIMEOUT 5000
 
 typedef struct {
     uint8_t hue;
@@ -473,8 +471,10 @@ struct {
     hsv_color_t stopped_color;
     hsv_color_t playing_color;
     hsv_color_t song_color;
+    hsv_color_t next_song_warning_color;
     LED_TYPE* play_status_leds[MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT];
     LED_TYPE* song_status_leds[MIDI_ONSTAGE_SONG_COUNT];
+    uint16_t next_song_timer;
 } midi_onstage;
 
 void midi_onstage_set_playing(bool playing)
@@ -665,6 +665,10 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 midi_onstage.song_color.sat = 255;
                 midi_onstage.song_color.val = 255;
 
+                midi_onstage.next_song_warning_color.hue = 120;
+                midi_onstage.next_song_warning_color.sat = 255;
+                midi_onstage.next_song_warning_color.val = 255;
+
                 midi_onstage.play_status_leds[0] = &led[7];
                 midi_onstage.play_status_leds[1] = &led[8];
                 midi_onstage.play_status_leds[2] = &led[9];
@@ -686,8 +690,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 midi_onstage.song_status_leds[8] = 0;
                 midi_onstage.song_status_leds[9] = 0;
 
+                rgblight_enable();
                 midi_onstage_set_playing(false);
                 midi_onstage_set_song(0);
+
+                midi_onstage.next_song_timer = 0;
 
                 layer_on(_ML_ONSTAGE);
             }
@@ -699,6 +706,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             if (record->event.pressed)
             {
                 midi_onstage_set_playing(!midi_onstage.playing);
+                midi_onstage.next_song_timer = 0;
 
                 if (!shift_pressed)
                 {
@@ -715,6 +723,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             if (record->event.pressed)
             {
                 midi_onstage_set_playing(false);
+                midi_onstage.next_song_timer = 0;
 
                 if (!shift_pressed)
                 {
@@ -731,6 +740,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             if (record->event.pressed)
             {
                 midi_onstage_set_song(opt);
+                midi_onstage.next_song_timer = 0;
 
                 if (!shift_pressed)
                 {
@@ -766,6 +776,50 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                     midi_onstage.color_val_scale = 1.0f;
                 midi_onstage_set_playing(midi_onstage.playing);
                 midi_onstage_set_song(midi_onstage.current_song);
+            }
+
+            break;
+        }
+        case ONSTAGE_PLAY_NEXT_SONG:
+        {
+            // Trigger next song on key *release*, which is more comfortable with a foot switch
+            // Also avoid double-triggering by ignoring rapid presses and releases
+
+            if (record->event.pressed)
+            {
+                // Show warning
+                for (uint8_t i=0; i < MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT; i++)
+                {
+                    sethsv(
+                        midi_onstage.next_song_warning_color.hue,
+                        midi_onstage.next_song_warning_color.sat,
+                        midi_onstage.next_song_warning_color.val * midi_onstage.color_val_scale,
+                        midi_onstage.play_status_leds[i]);
+                }
+
+                rgblight_set();
+            }
+            else
+            {
+                midi_onstage_set_playing(midi_onstage.playing);
+
+                if (timer_elapsed(midi_onstage.next_song_timer) < MIDI_ONSTAGE_PLAY_NEXT_SONG_TIMEOUT)
+                    break;
+
+                midi_onstage.next_song_timer = timer_read();
+                midi_onstage.current_song++;
+                if (midi_onstage.current_song >= MIDI_ONSTAGE_SONG_COUNT)
+                    midi_onstage.current_song = MIDI_ONSTAGE_SONG_COUNT - 1;
+                midi_onstage_set_song(midi_onstage.current_song);
+
+                if (!shift_pressed)
+                {
+                    // start the song
+                    uint8_t note = midi_onstage.songs[midi_onstage.current_song];
+                    midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+                    midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+                    midi_onstage_set_playing(true);
+                }
             }
 
             break;
