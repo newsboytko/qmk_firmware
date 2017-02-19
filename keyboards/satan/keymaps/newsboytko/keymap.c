@@ -21,6 +21,7 @@ enum layer_id
     _GL_MAC,
     _GL_MAC_TASKSWITCH,
     _ML,
+    _ML_ONSTAGE,
 };
 
 enum function_id {
@@ -155,7 +156,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |      |    |    |    |    |    |    |    |    |    |    | BL-| BL+|  BL |
    * |------------------------------------------------------------------------|
-   * |       |    |    |    |    |    |    |    |    |    |    |    |  MIDI   |
+   * |       |    |    |    |    |    |    |    |    |    |    |    |>>MIDI   |
    * |------------------------------------------------------------------------|
    * |         |RGB |Mode|Hue+|Hue-|Sat+|Sat-|Val+|Val-|    |    |            |
    * |------------------------------------------------------------------------|
@@ -301,7 +302,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |  Ch+ |    | C# | D# |    | F# | G# | A# |    | C# | D# |    |    |     |
    * |------------------------------------------------------------------------|
-   * |  Mod  | C  | D  | E  | F  | G  | A  | B  | C  | D  | E  | F  |         |
+   * |  Mod  | C  | D  | E  | F  | G  | A  | B  | C  | D  | E  | F  |>>OnStage|
    * |------------------------------------------------------------------------|
    * | Sustain |Oct-|Oct+|Mod-|Mod+|    |    |    |Tns-|Tns+|Tns0|   Sustain  |
    * |------------------------------------------------------------------------|
@@ -318,13 +319,63 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_ML] = KEYMAP_ANSI_FOOTSWITCHES(
   TG(_ML), MI_VEL_1, MI_VEL_2, MI_VEL_3, MI_VEL_4, MI_VEL_5, MI_VEL_6, MI_VEL_7, MI_VEL_8, MI_VEL_9, MI_VEL_10, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_CHU,  XXXXXXX, MI_Cs,   MI_Ds,   XXXXXXX, MI_Fs,   MI_Gs,   MI_As,   XXXXXXX, MI_Cs_1, MI_Ds_1, XXXXXXX, XXXXXXX, XXXXXXX, \
-  MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           XXXXXXX, \
+  MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           TG(_ML_ONSTAGE), \
   MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, MI_TRNSD, MI_TRNSU, MI_TRNS_0,             MI_SUS, \
   _______, _______, _______,                          MI_OFF,                               _______, _______, _______, _______, \
   _______, _______),
 
+/* Keymap _ML_ONSTAGE: MIDI Layer for performance on stage
+   * ,------------------------------------------------------------------------.
+   * | Exit | C  | C# | D  | D# | E  | F  | F# | G  | G# | A  |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+
+[_ML_ONSTAGE] = KEYMAP_ANSI_FOOTSWITCHES(
+  TG(_ML_ONSTAGE), MI_C, MI_Cs, MI_D, MI_Ds, MI_E, MI_F, MI_Fs, MI_G, MI_Gs, MI_A, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX),
+
+
+//
+// Template:
+//
 #if 0
-Template:
+/* Keymap 
+   * ,------------------------------------------------------------------------.
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
 
 [] = KEYMAP_ANSI_FOOTSWITCHES(
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
