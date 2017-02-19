@@ -1,5 +1,6 @@
 #include "satan.h"
 #include "process_midi.h"
+#include "rgblight.h"
 
 // Readability
 #define _______ KC_TRNS
@@ -48,6 +49,9 @@ enum function_id {
     ONSTAGE_SELECT_SONG_8,
     ONSTAGE_SELECT_SONG_9,
     ONSTAGE_SELECT_SONG_10,
+    ONSTAGE_BRIGHTNESS,
+    ONSTAGE_BRIGHTD = ONSTAGE_BRIGHTNESS,
+    ONSTAGE_BRIGHTU,
 };
 
 enum macro_id {
@@ -360,7 +364,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 
 [_ML_ONSTAGE] = KEYMAP_ANSI_FOOTSWITCHES(
-  TG(_ML_ONSTAGE), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), XXXXXXX, XXXXXXX, XXXXXXX, \
+  TG(_ML_ONSTAGE), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), F(ONSTAGE_BRIGHTD), F(ONSTAGE_BRIGHTU), XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
   KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_RSFT, \
@@ -426,6 +430,8 @@ const uint16_t PROGMEM fn_actions[] = {
   [ONSTAGE_SELECT_SONG_8] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 7),
   [ONSTAGE_SELECT_SONG_9] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 8),
   [ONSTAGE_SELECT_SONG_10] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 9),
+  [ONSTAGE_BRIGHTD] = ACTION_FUNCTION(ONSTAGE_BRIGHTD),
+  [ONSTAGE_BRIGHTU] = ACTION_FUNCTION(ONSTAGE_BRIGHTU),
 };
 
 // Used for SHIFT_ESC
@@ -442,13 +448,81 @@ void persistent_default_layer_set(uint16_t default_layer)
 }
 
 #define MIDI_ONSTAGE_SONG_COUNT 10
+#define MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT 9
+#define MIDI_ONSTAGE_COLOR_VAL_STEP 0.1
+
+// typedef struct {
+//     uint8_t r;
+//     uint8_t g;
+//     uint8_t b;
+// } rgb_color_t;
+
+typedef struct {
+    uint8_t hue;
+    uint8_t sat;
+    uint8_t val;
+} hsv_color_t;
 
 struct {
     bool playing;
     uint8_t current_song;
     uint8_t songs[MIDI_ONSTAGE_SONG_COUNT];
     uint8_t stop_note;
+    float color_val_scale;
+    hsv_color_t background_color;
+    hsv_color_t stopped_color;
+    hsv_color_t playing_color;
+    hsv_color_t song_color;
+    LED_TYPE* play_status_leds[MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT];
+    LED_TYPE* song_status_leds[MIDI_ONSTAGE_SONG_COUNT];
 } midi_onstage;
+
+void midi_onstage_set_playing(bool playing)
+{
+    midi_onstage.playing = playing;
+    const hsv_color_t* color = playing ? &midi_onstage.playing_color : &midi_onstage.stopped_color;
+
+    for (uint8_t i=0; i < MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT; i++)
+    {
+        sethsv(
+            color->hue,
+            color->sat,
+            color->val * midi_onstage.color_val_scale,
+            midi_onstage.play_status_leds[i]);
+    }
+
+    rgblight_set();
+}
+
+void midi_onstage_set_song(uint8_t song)
+{
+    midi_onstage.current_song = song;
+
+    for (uint8_t i=0; i < MIDI_ONSTAGE_SONG_COUNT; i++)
+    {
+        if (!midi_onstage.song_status_leds[i])
+            continue;
+
+        if (i == song)
+        {
+            sethsv(
+                midi_onstage.song_color.hue + i * (255 / 7),
+                midi_onstage.song_color.sat,
+                midi_onstage.song_color.val * midi_onstage.color_val_scale,
+                midi_onstage.song_status_leds[i]);
+        }
+        else
+        {
+            sethsv(
+                midi_onstage.background_color.hue,
+                midi_onstage.background_color.sat,
+                midi_onstage.background_color.val * midi_onstage.color_val_scale,
+                midi_onstage.song_status_leds[i]);
+        }
+    }
+
+    rgblight_set();
+}
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
     uint8_t shift_pressed;
@@ -566,14 +640,54 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             if (record->event.pressed)
             {
                 midi_init();
-                midi_onstage.playing = false;
-                midi_onstage.current_song = 0;
                 midi_onstage.stop_note = midi_compute_note(MI_C_2);
 
                 for (uint8_t i = 0; i < MIDI_ONSTAGE_SONG_COUNT; i++)
                 {
                     midi_onstage.songs[i] = midi_compute_note(MIDI_TONE_MIN + i);
                 }
+
+                midi_onstage.color_val_scale = 0.8f;
+
+                midi_onstage.background_color.hue = 0;
+                midi_onstage.background_color.sat = 0;
+                midi_onstage.background_color.val = 100;
+
+                midi_onstage.stopped_color.hue = 0;
+                midi_onstage.stopped_color.sat = 255;
+                midi_onstage.stopped_color.val = 255;
+                
+                midi_onstage.playing_color.hue = 0;
+                midi_onstage.playing_color.sat = 0;
+                midi_onstage.playing_color.val = 100;
+
+                midi_onstage.song_color.hue = 80;
+                midi_onstage.song_color.sat = 255;
+                midi_onstage.song_color.val = 255;
+
+                midi_onstage.play_status_leds[0] = &led[7];
+                midi_onstage.play_status_leds[1] = &led[8];
+                midi_onstage.play_status_leds[2] = &led[9];
+                midi_onstage.play_status_leds[3] = &led[10];
+                midi_onstage.play_status_leds[4] = &led[11];
+                midi_onstage.play_status_leds[5] = &led[12];
+                midi_onstage.play_status_leds[6] = &led[13];
+                midi_onstage.play_status_leds[7] = &led[14];
+                midi_onstage.play_status_leds[8] = &led[15];
+
+                midi_onstage.song_status_leds[0] = &led[0];
+                midi_onstage.song_status_leds[1] = &led[1];
+                midi_onstage.song_status_leds[2] = &led[2];
+                midi_onstage.song_status_leds[3] = &led[3];
+                midi_onstage.song_status_leds[4] = &led[4];
+                midi_onstage.song_status_leds[5] = &led[5];
+                midi_onstage.song_status_leds[6] = &led[6];
+                midi_onstage.song_status_leds[7] = 0;
+                midi_onstage.song_status_leds[8] = 0;
+                midi_onstage.song_status_leds[9] = 0;
+
+                midi_onstage_set_playing(false);
+                midi_onstage_set_song(0);
 
                 layer_on(_ML_ONSTAGE);
             }
@@ -584,7 +698,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         {
             if (record->event.pressed)
             {
-                midi_onstage.playing = !midi_onstage.playing;
+                midi_onstage_set_playing(!midi_onstage.playing);
 
                 if (!shift_pressed)
                 {
@@ -600,7 +714,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         {
             if (record->event.pressed)
             {
-                midi_onstage.playing = false;
+                midi_onstage_set_playing(false);
 
                 if (!shift_pressed)
                 {
@@ -616,7 +730,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         {
             if (record->event.pressed)
             {
-                midi_onstage.current_song = opt;
+                midi_onstage_set_song(opt);
 
                 if (!shift_pressed)
                 {
@@ -624,8 +738,34 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                     uint8_t note = midi_onstage.songs[midi_onstage.current_song];
                     midi_send_noteon(&midi_device, midi_config.channel, note, 127);
                     midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
-                    midi_onstage.playing = true;
+                    midi_onstage_set_playing(true);
                 }
+            }
+
+            break;
+        }
+        case ONSTAGE_BRIGHTD:
+        {
+            if (record->event.pressed)
+            {
+                midi_onstage.color_val_scale -= MIDI_ONSTAGE_COLOR_VAL_STEP;
+                if (midi_onstage.color_val_scale < 0.0f)
+                    midi_onstage.color_val_scale = 0.0f;
+                midi_onstage_set_playing(midi_onstage.playing);
+                midi_onstage_set_song(midi_onstage.current_song);
+            }
+
+            break;
+        }
+        case ONSTAGE_BRIGHTU:
+        {
+            if (record->event.pressed)
+            {
+                midi_onstage.color_val_scale += MIDI_ONSTAGE_COLOR_VAL_STEP;
+                if (midi_onstage.color_val_scale > 1.0f)
+                    midi_onstage.color_val_scale = 1.0f;
+                midi_onstage_set_playing(midi_onstage.playing);
+                midi_onstage_set_song(midi_onstage.current_song);
             }
 
             break;
