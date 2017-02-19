@@ -1,4 +1,5 @@
 #include "satan.h"
+#include "process_midi.h"
 
 // Readability
 #define _______ KC_TRNS
@@ -33,6 +34,20 @@ enum function_id {
     MAC_TASKSWITCH_ENABLE,
     MAC_TASKSWITCH_SELECT,
     MAC_TASKSWITCH_CANCEL,
+    ONSTAGE_ENABLE,
+    ONSTAGE_PLAYSTOP,
+    ONSTAGE_STOP,
+    ONSTAGE_SELECT_SONG,
+    ONSTAGE_SELECT_SONG_1 = ONSTAGE_SELECT_SONG,
+    ONSTAGE_SELECT_SONG_2,
+    ONSTAGE_SELECT_SONG_3,
+    ONSTAGE_SELECT_SONG_4,
+    ONSTAGE_SELECT_SONG_5,
+    ONSTAGE_SELECT_SONG_6,
+    ONSTAGE_SELECT_SONG_7,
+    ONSTAGE_SELECT_SONG_8,
+    ONSTAGE_SELECT_SONG_9,
+    ONSTAGE_SELECT_SONG_10,
 };
 
 enum macro_id {
@@ -319,7 +334,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_ML] = KEYMAP_ANSI_FOOTSWITCHES(
   TG(_ML), MI_VEL_1, MI_VEL_2, MI_VEL_3, MI_VEL_4, MI_VEL_5, MI_VEL_6, MI_VEL_7, MI_VEL_8, MI_VEL_9, MI_VEL_10, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_CHU,  XXXXXXX, MI_Cs,   MI_Ds,   XXXXXXX, MI_Fs,   MI_Gs,   MI_As,   XXXXXXX, MI_Cs_1, MI_Ds_1, XXXXXXX, XXXXXXX, XXXXXXX, \
-  MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           TG(_ML_ONSTAGE), \
+  MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           F(ONSTAGE_ENABLE), \
   MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, MI_TRNSD, MI_TRNSU, MI_TRNS_0,             MI_SUS, \
   _______, _______, _______,                          MI_OFF,                               _______, _______, _______, _______, \
   _______, _______),
@@ -332,9 +347,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |       |    |    |    |    |    |    |    |    |    |    |    |         |
    * |------------------------------------------------------------------------|
-   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |  Shift  |    |    |    |    |    |    |    |    |    |    |    Shift   |
    * |------------------------------------------------------------------------|
-   * |     |     |     |                              |     |     |     |     |
+   * |Stop |     |     |         Play / Stop          |     |     |     |     |
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -345,11 +360,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 
 [_ML_ONSTAGE] = KEYMAP_ANSI_FOOTSWITCHES(
-  TG(_ML_ONSTAGE), MI_C, MI_Cs, MI_D, MI_Ds, MI_E, MI_F, MI_Fs, MI_G, MI_Gs, MI_A, XXXXXXX, XXXXXXX, XXXXXXX, \
+  TG(_ML_ONSTAGE), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_RSFT, \
+  F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX),
 
 
@@ -398,6 +413,19 @@ const uint16_t PROGMEM fn_actions[] = {
   [MAC_TASKSWITCH_ENABLE] = ACTION_FUNCTION(MAC_TASKSWITCH_ENABLE),
   [MAC_TASKSWITCH_SELECT] = ACTION_FUNCTION(MAC_TASKSWITCH_SELECT),
   [MAC_TASKSWITCH_CANCEL] = ACTION_FUNCTION(MAC_TASKSWITCH_CANCEL),
+  [ONSTAGE_ENABLE] = ACTION_FUNCTION(ONSTAGE_ENABLE),
+  [ONSTAGE_PLAYSTOP] = ACTION_FUNCTION(ONSTAGE_PLAYSTOP),
+  [ONSTAGE_STOP] = ACTION_FUNCTION(ONSTAGE_STOP),
+  [ONSTAGE_SELECT_SONG_1] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 0),
+  [ONSTAGE_SELECT_SONG_2] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 1),
+  [ONSTAGE_SELECT_SONG_3] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 2),
+  [ONSTAGE_SELECT_SONG_4] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 3),
+  [ONSTAGE_SELECT_SONG_5] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 4),
+  [ONSTAGE_SELECT_SONG_6] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 5),
+  [ONSTAGE_SELECT_SONG_7] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 6),
+  [ONSTAGE_SELECT_SONG_8] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 7),
+  [ONSTAGE_SELECT_SONG_9] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 8),
+  [ONSTAGE_SELECT_SONG_10] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 9),
 };
 
 // Used for SHIFT_ESC
@@ -412,6 +440,15 @@ void persistent_default_layer_set(uint16_t default_layer)
     eeconfig_update_default_layer(default_layer);
     default_layer_set(default_layer);
 }
+
+#define MIDI_ONSTAGE_SONG_COUNT 10
+
+struct {
+    bool playing;
+    uint8_t current_song;
+    uint8_t songs[MIDI_ONSTAGE_SONG_COUNT];
+    uint8_t stop_note;
+} midi_onstage;
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
     uint8_t shift_pressed;
@@ -522,6 +559,75 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 layer_off(_GL_MAC);
             }
             
+            break;
+        }
+        case ONSTAGE_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                midi_init();
+                midi_onstage.playing = false;
+                midi_onstage.current_song = 0;
+                midi_onstage.stop_note = midi_compute_note(MI_C_2);
+
+                for (uint8_t i = 0; i < MIDI_ONSTAGE_SONG_COUNT; i++)
+                {
+                    midi_onstage.songs[i] = midi_compute_note(MIDI_TONE_MIN + i);
+                }
+
+                layer_on(_ML_ONSTAGE);
+            }
+
+            break;
+        }
+        case ONSTAGE_PLAYSTOP:
+        {
+            if (record->event.pressed)
+            {
+                midi_onstage.playing = !midi_onstage.playing;
+
+                if (!shift_pressed)
+                {
+                    uint8_t note = midi_onstage.playing ? midi_onstage.songs[midi_onstage.current_song] : midi_onstage.stop_note;
+                    midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+                    midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+                }
+            }
+
+            break;
+        }
+        case ONSTAGE_STOP:
+        {
+            if (record->event.pressed)
+            {
+                midi_onstage.playing = false;
+
+                if (!shift_pressed)
+                {
+                    uint8_t note = midi_onstage.stop_note;
+                    midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+                    midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+                }
+            }
+
+            break;
+        }
+        case ONSTAGE_SELECT_SONG:
+        {
+            if (record->event.pressed)
+            {
+                midi_onstage.current_song = opt;
+
+                if (!shift_pressed)
+                {
+                    // start the song
+                    uint8_t note = midi_onstage.songs[midi_onstage.current_song];
+                    midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+                    midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+                    midi_onstage.playing = true;
+                }
+            }
+
             break;
         }
     }
