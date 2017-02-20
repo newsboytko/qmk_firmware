@@ -105,6 +105,7 @@ void audio_init() {
     }
     audio_config.raw = eeconfig_read_audio();
 
+#if 0
     #ifdef PWM_AUDIO
 
         PLLFRQ = _BV(PDIV2);
@@ -141,6 +142,7 @@ void audio_init() {
         TCCR3B = (1 << WGM33)  | (1 << WGM32)  | (0 << CS32)  | (1 << CS31) | (0 << CS30);
 
     #endif
+#endif
 
     audio_initialized = true;
 }

@@ -143,7 +143,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_FL] = KEYMAP_ANSI_FOOTSWITCHES(
   KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  \
   _______, KC_HOME, KC_UP,   KC_END,  KC_PGUP, _______, KC_PGUP, KC_HOME, KC_UP,   KC_END,  _______, KC_PSCR, KC_SLCK, KC_PAUS, \
-  _______, KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, _______, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _______, KC_INS,          _______, \
+  _______, KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, _______, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _______, KC_INS,          MU_TOG, \
   _______, _______, _______, _______, _______, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPRV, KC_MNXT, KC_MSTP,                  _______, \
   _______, _______, _______,                            KC_MPLY,                            _______, _______, _______, _______, \
   _______, _______),
@@ -334,6 +334,7 @@ void persistent_default_layer_set(uint16_t default_layer)
 }
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
+	dprintf("action_function\n");
     uint8_t shift_pressed;
     shift_pressed = get_mods() & MODS_SHIFT_MASK;
     switch (id) {
@@ -471,5 +472,5 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 
 void matrix_init_user()
 {
-    //debug_enable = true;
+    debug_enable = true;
 }

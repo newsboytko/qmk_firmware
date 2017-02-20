@@ -89,6 +89,8 @@ void audio_init()
     }
     audio_config.raw = eeconfig_read_audio();
 
+#if 0
+
 	// Set port PC6 (OC3A and /OC4A) as output
     DDRC |= _BV(PORTC6);
 
@@ -100,6 +102,7 @@ void audio_init()
 	// Clock Select (CS3n) = 0b010 = Clock / 8
     TCCR3A = (0 << COM3A1) | (0 << COM3A0) | (1 << WGM31) | (0 << WGM30);
     TCCR3B = (1 << WGM33)  | (1 << WGM32)  | (0 << CS32)  | (1 << CS31) | (0 << CS30);
+#endif
 
     audio_initialized = true;
 }

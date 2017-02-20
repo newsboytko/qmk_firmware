@@ -17,6 +17,8 @@ static uint16_t music_sequence_interval = 100;
 
 bool process_music(uint16_t keycode, keyrecord_t *record) {
 
+	//dprintf("process music\n");
+
     if (keycode == AU_ON && record->event.pressed) {
       audio_on();
       return false;
@@ -114,17 +116,45 @@ bool process_music(uint16_t keycode, keyrecord_t *record) {
             music_sequence_interval+=10;
         return false;
       }
+
       #define MUSIC_MODE_GUITAR
+
+      //HACK HACK HACK
+      #define MIDI_ENABLE
 
       #ifdef MUSIC_MODE_CHROMATIC
       float freq = ((float)220.0)*pow(2.0, -5.0)*pow(2.0,(music_starting_note + record->event.key.col + music_offset)/12.0+(MATRIX_ROWS - record->event.key.row));
+      #ifdef MIDI_ENABLE
+      uint8_t note = (music_starting_note + record->event.key.col + music_offset - 3)+12*(MATRIX_ROWS - record->event.key.row);
+      #endif
       #elif defined(MUSIC_MODE_GUITAR)
       float freq = ((float)220.0)*pow(2.0, -5.0)*pow(2.0,(music_starting_note + record->event.key.col + music_offset)/12.0+(float)(MATRIX_ROWS - record->event.key.row + 7)*5.0/12);
+      #ifdef MIDI_ENABLE
+      uint8_t note = (music_starting_note + record->event.key.col + music_offset + 32)+5*(MATRIX_ROWS - record->event.key.row);
+      #endif
       #elif defined(MUSIC_MODE_VIOLIN)
       float freq = ((float)220.0)*pow(2.0, -5.0)*pow(2.0,(music_starting_note + record->event.key.col + music_offset)/12.0+(float)(MATRIX_ROWS - record->event.key.row + 5)*7.0/12);
+      #ifdef MIDI_ENABLE
+      uint8_t note = (music_starting_note + record->event.key.col + music_offset + 32)+7*(MATRIX_ROWS - record->event.key.row);
+      #endif
       #else
       float freq = ((float)220.0)*pow(2.0, -5.0)*pow(2.0,(music_starting_note + SCALE[record->event.key.col + music_offset])/12.0+(MATRIX_ROWS - record->event.key.row));
+      #ifdef MIDI_ENABLE
+      uint8_t note = (music_starting_note + SCALE[record->event.key.col + music_offset] - 3)+12*(MATRIX_ROWS - record->event.key.row);
       #endif
+      #endif
+
+      //HACK HACK HACK
+      #undef MIDI_ENABLE
+
+      dprintf("music freq: %d, note: %d, row: %d, col: %d, music_offset: %d, music_starting_note: %d, MATRIX_ROWS: %d\n", 
+      	(int)freq,
+      	note,
+      	record->event.key.row,
+      	record->event.key.col,
+      	music_offset,
+      	music_starting_note,
+      	MATRIX_ROWS);
 
       if (record->event.pressed) {
         play_note(freq, 0xF);
@@ -155,11 +185,13 @@ void music_toggle(void) {
 }
 
 void music_on(void) {
+	dprintf("music on\n");
     music_activated = 1;
     music_on_user();
 }
 
 void music_off(void) {
+	dprintf("music off\n");
     music_activated = 0;
     stop_all_notes();
 }
