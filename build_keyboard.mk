@@ -142,6 +142,7 @@ endif
 ifeq ($(strip $(MIDI_ENABLE)), yes)
     OPT_DEFS += -DMIDI_ENABLE
 	SRC += $(QUANTUM_DIR)/process_keycode/process_midi.c
+	SRC += $(QUANTUM_DIR)/process_keycode/process_music.c
 endif
 
 ifeq ($(strip $(COMBO_ENABLE)), yes)

@@ -40,6 +40,9 @@ extern uint32_t default_layer_state;
 
 #ifdef AUDIO_ENABLE
  	#include "audio.h"
+#endif
+
+#if defined(AUDIO_ENABLE) || defined(MIDI_ENABLE)
 	#include "process_music.h"
 #endif
 

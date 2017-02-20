@@ -89,6 +89,7 @@ void audio_init()
     }
     audio_config.raw = eeconfig_read_audio();
 
+    // HACK HACK HACK
 #if 0
 
 	// Set port PC6 (OC3A and /OC4A) as output

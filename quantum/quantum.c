@@ -153,7 +153,7 @@ bool process_record_quantum(keyrecord_t *record) {
   #ifdef MIDI_ENABLE
     process_midi(keycode, record) &&
   #endif
-  #ifdef AUDIO_ENABLE
+  #if defined(AUDIO_ENABLE) || defined(MIDI_ENABLE)
     process_music(keycode, record) &&
   #endif
   #ifdef TAP_DANCE_ENABLE
@@ -589,7 +589,7 @@ void matrix_init_quantum() {
 }
 
 void matrix_scan_quantum() {
-  #ifdef AUDIO_ENABLE
+  #if defined(AUDIO_ENABLE) || defined(MIDI_ENABLE)
     matrix_scan_music();
   #endif
 
