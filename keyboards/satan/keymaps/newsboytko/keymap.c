@@ -25,7 +25,16 @@ enum layer_id
     _GL_MAC_TASKSWITCH,
     _ML,
     _ML_ONSTAGE,
+    _DYN,
+    _RED_ALERT,
 };
+
+// Enable Dynamic Macros
+enum planck_keycodes {
+	DEFAULT = SAFE_RANGE,
+	DYNAMIC_MACRO_RANGE,	
+};
+#include "dynamic_macro.h"
 
 enum function_id {
     SHIFT_ESC,
@@ -73,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |Shift    |   Z|   X|   C|   V|   B|   N|   M|   ,|   .|   /|      Shift |
    * |------------------------------------------------------------------------|
-   * |Ctrl | Gui | Alt |            Space             | Alt | RL  | FN  | Ctrl|
+   * |Ctrl | Gui | Alt |            Space             | Alt | RL  | FN  | Dyn |
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -87,7 +96,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             MO(_GL_WINDOWS), MO(_RL), MO(_FL), KC_RCTL, \
+  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             MO(_GL_WINDOWS), MO(_RL), MO(_FL), MO(_DYN), \
   MO(_FL), KC_LSFT),
 
   /* Keymap _DL_MAC: Default Layer for Mac
@@ -100,7 +109,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------------------------------------------------------------------------|
    * |Shift    |   Z|   X|   C|   V|   B|   N|   M|   ,|   .|   /|      Shift |
    * |------------------------------------------------------------------------|
-   * |Ctrl | Alt | Gui |            Space             | GL  | RL  | FN  | Ctrl|
+   * |Ctrl | Alt | Gui |            Space             | GL  | RL  | FN  | Dyn |
    * `------------------------------------------------------------------------'
    *
    * Foot switches:
@@ -114,7 +123,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             MO(_GL_MAC), MO(_RL), MO(_FL), KC_RCTL, \
+  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             MO(_GL_MAC), MO(_RL), MO(_FL), MO(_DYN), \
   MO(_FL), KC_LSFT),
 
   /* Keymap _DL_KIDS: Default layer for child's play
@@ -373,6 +382,61 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
 
+/* Keymap _DYN: Dynamic Macro Layer
+   * ,------------------------------------------------------------------------.
+   * |      |Rec1|    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |             Play1            |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+
+[_DYN] = KEYMAP_ANSI_FOOTSWITCHES(
+  TG(_RED_ALERT), DYN_REC_START1, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
+  _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
+  _______, _______),
+
+/* Keymap 
+   * ,------------------------------------------------------------------------.
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |------------------------------------------------------------------------|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
+   * |------------------------------------------------------------------------|
+   * |         |    |    |    |    |    |    |    |    |    |    |            |
+   * |------------------------------------------------------------------------|
+   * |     |     |     |                              |     |     |     |     |
+   * `------------------------------------------------------------------------'
+   *
+   * Foot switches:
+   *                ,--------.         ,--------.
+   *                |        |         |        |
+   *                |        |         |        |
+   *                `--------'         `--------'
+   */
+
+[_RED_ALERT] = KEYMAP_ANSI_FOOTSWITCHES(
+  TG(_RED_ALERT), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, DYN_MACRO_PLAY1),
 
 //
 // Template:
@@ -852,4 +916,12 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 void matrix_init_user()
 {
     debug_enable = true;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_record_dynamic_macro(keycode, record)) {
+        return true;
+    }
+
+    return true;
 }
