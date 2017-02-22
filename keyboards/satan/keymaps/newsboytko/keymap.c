@@ -25,16 +25,16 @@ enum layer_id
     _GL_MAC_TASKSWITCH,
     _ML,
     _ML_ONSTAGE,
-    _DYN,
+    //_DYN,
     _RED_ALERT,
 };
 
 // Enable Dynamic Macros
 enum planck_keycodes {
-	DEFAULT = SAFE_RANGE,
-	DYNAMIC_MACRO_RANGE,	
+    DEFAULT = SAFE_RANGE,
+    DYNAMIC_MACRO_RANGE,    
 };
-#include "dynamic_macro.h"
+//#include "dynamic_macro.h"
 
 enum function_id {
     SHIFT_ESC,
@@ -63,10 +63,20 @@ enum function_id {
     ONSTAGE_BRIGHTD = ONSTAGE_BRIGHTNESS,
     ONSTAGE_BRIGHTU,
     ONSTAGE_PLAY_NEXT_SONG,
+    REDALERT_ENABLE,
+    REDALERT_SELECT,
+    REDALERT_SELECT_1 = REDALERT_SELECT,
+    REDALERT_SELECT_2,
+    REDALERT_SELECT_3,
+    REDALERT_SELECT_4,
+    REDALERT_SELECT_5,
+    REDALERT_EXECUTE,
+    REDALERT_CANCEL,
 };
 
 enum macro_id {
     SD_SUBMIT_YOLO,
+    RED_ALERT_EXECUTE,
 };
 
 
@@ -96,7 +106,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             MO(_GL_WINDOWS), MO(_RL), MO(_FL), MO(_DYN), \
+  KC_LCTL, KC_LGUI, KC_LALT,                           KC_SPC,                             MO(_GL_WINDOWS), MO(_RL), MO(_FL), KC_RCTL, \
   MO(_FL), KC_LSFT),
 
   /* Keymap _DL_MAC: Default Layer for Mac
@@ -123,7 +133,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,   KC_R,    KC_T,    KC_Y,    KC_U,     KC_I,    KC_O,   KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, \
   MO(_FL), KC_A,    KC_S,    KC_D,   KC_F,    KC_G,    KC_H,    KC_J,     KC_K,    KC_L,   KC_SCLN, KC_QUOT,          KC_ENT,  \
   KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V,    KC_B,    KC_N,    KC_M,     KC_COMM, KC_DOT, KC_SLSH,                   KC_RSFT, \
-  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             MO(_GL_MAC), MO(_RL), MO(_FL), MO(_DYN), \
+  KC_LCTL, KC_LALT, KC_LGUI,                           KC_SPC,                             MO(_GL_MAC), MO(_RL), MO(_FL), KC_RCTL, \
   MO(_FL), KC_LSFT),
 
   /* Keymap _DL_KIDS: Default layer for child's play
@@ -237,7 +247,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *                `--------'         `--------'
    */
 [_GL_WINDOWS] = KEYMAP_ANSI_FOOTSWITCHES(
-  LGUI(KC_L), M(SD_SUBMIT_YOLO), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LALT(KC_F4), \
+  LGUI(KC_L), M(SD_SUBMIT_YOLO), _______, _______, _______, _______, _______, _______, _______, _______, F(REDALERT_ENABLE), _______, _______, LALT(KC_F4), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT)), F(WINDOWS_TASKSWITCH_ENABLE), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_LEFT), LGUI(KC_RGHT), LGUI(KC_UP), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
@@ -382,9 +392,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
 
+#if 0
 /* Keymap _DYN: Dynamic Macro Layer
    * ,------------------------------------------------------------------------.
-   * |      |Rec1|    |    |    |    |    |    |    |    |    |    |    |     |
+   * |  RA  |Rec1|    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
    * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
@@ -403,16 +414,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 
 [_DYN] = KEYMAP_ANSI_FOOTSWITCHES(
-  TG(_RED_ALERT), DYN_REC_START1, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  F(REDALERT_ENABLE), /*DYN_REC_START1*/ _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, /*DYN_MACRO_PLAY1*/ _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
   _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
   _______, _______),
+#endif
 
 /* Keymap 
    * ,------------------------------------------------------------------------.
-   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |Abort |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
    * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
@@ -425,18 +437,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * Foot switches:
    *                ,--------.         ,--------.
-   *                |        |         |        |
+   *                |        |         |Execute |
    *                |        |         |        |
    *                `--------'         `--------'
    */
 
 [_RED_ALERT] = KEYMAP_ANSI_FOOTSWITCHES(
-  TG(_RED_ALERT), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  F(REDALERT_CANCEL), F(REDALERT_SELECT_1), F(REDALERT_SELECT_2), F(REDALERT_SELECT_3), F(REDALERT_SELECT_4), F(REDALERT_SELECT_5), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, DYN_MACRO_PLAY1),
+  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, _______, \
+  XXXXXXX, /*DYN_MACRO_PLAY1*/ F(REDALERT_EXECUTE)),
 
 //
 // Template:
@@ -499,6 +511,14 @@ const uint16_t PROGMEM fn_actions[] = {
   [ONSTAGE_BRIGHTD] = ACTION_FUNCTION(ONSTAGE_BRIGHTD),
   [ONSTAGE_BRIGHTU] = ACTION_FUNCTION(ONSTAGE_BRIGHTU),
   [ONSTAGE_PLAY_NEXT_SONG] = ACTION_FUNCTION(ONSTAGE_PLAY_NEXT_SONG),
+  [REDALERT_ENABLE] = ACTION_FUNCTION(REDALERT_ENABLE),
+  [REDALERT_CANCEL] = ACTION_FUNCTION(REDALERT_CANCEL),
+  [REDALERT_EXECUTE] = ACTION_FUNCTION(REDALERT_EXECUTE),
+  [REDALERT_SELECT_1] = ACTION_FUNCTION_OPT(REDALERT_SELECT, 1),
+  [REDALERT_SELECT_2] = ACTION_FUNCTION_OPT(REDALERT_SELECT, 2),
+  [REDALERT_SELECT_3] = ACTION_FUNCTION_OPT(REDALERT_SELECT, 3),
+  [REDALERT_SELECT_4] = ACTION_FUNCTION_OPT(REDALERT_SELECT, 4),
+  [REDALERT_SELECT_5] = ACTION_FUNCTION_OPT(REDALERT_SELECT, 5),
 };
 
 // Used for SHIFT_ESC
@@ -586,6 +606,16 @@ void midi_onstage_set_song(uint8_t song)
     }
 
     rgblight_set();
+}
+
+struct {
+    uint8_t current;
+} red_alert;
+
+void cancel_red_alert(void)
+{
+    layer_off(_RED_ALERT);
+    rgblight_toggle();
 }
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
@@ -888,6 +918,71 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
 
             break;
         }
+        case REDALERT_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                red_alert.current = 0;
+
+                // set RGB to breathing red
+                rgblight_enable();
+                rgblight_sethsv(0, 255, 0);
+                rgblight_mode(5); // breathing
+
+                layer_on(_RED_ALERT);
+            }
+
+            break;
+        }
+        case REDALERT_CANCEL:
+        {
+            if (record->event.pressed)
+            {
+                cancel_red_alert();
+            }
+
+            break;
+        }
+        case REDALERT_EXECUTE:
+        {
+            if (record->event.pressed && red_alert.current != 0)
+            {
+                const macro_t* macro;
+
+                switch (red_alert.current)
+                {
+                    case 1:
+                        macro = MACRO( I(150), 
+                            T(ENT),
+                            END );
+                        break;
+                    case 2:
+                        macro = MACRO( I(150), 
+                            D(LCTL), D(LCTL), T(V), U(LCTL), T(ENT),
+                            END );
+                        break;
+                    case 3:
+                        macro = MACRO( I(150), 
+                            D(LALT), D(LALT), T(S), U(LALT), 
+                            END );
+                        break;
+                    default:
+                        macro = MACRO(END);
+                }
+
+                action_macro_play(macro);
+                cancel_red_alert();
+            }
+
+            break;
+        }
+        case REDALERT_SELECT:
+        {
+            if (record->event.pressed)
+                red_alert.current = opt;
+
+            break;
+        }
     }
 }
 
@@ -908,6 +1003,16 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
             }
             break;
         }
+        case RED_ALERT_EXECUTE: // this would trigger when you hit a key mapped as M(SD_SUBMIT_YOLO)
+        {
+            if (record->event.pressed)
+            {
+                return MACRO( I(150), 
+                    D(LCTL), D(LCTL), T(V), U(LCTL), T(ENT),
+                    END );
+            }
+            break;
+        }
     };
 
     return MACRO_NONE;
@@ -915,13 +1020,14 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 
 void matrix_init_user()
 {
-    debug_enable = true;
+    debug_enable = false;
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (!process_record_dynamic_macro(keycode, record)) {
-        return true;
-    }
+// bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-    return true;
-}
+//     if (!process_record_dynamic_macro(keycode, record)) {
+//         return false;
+//     }
+
+//     return true;
+// }
