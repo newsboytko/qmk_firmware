@@ -25,16 +25,8 @@ enum layer_id
     _GL_MAC_TASKSWITCH,
     _ML,
     _ML_ONSTAGE,
-    //_DYN,
     _RED_ALERT,
 };
-
-// Enable Dynamic Macros
-enum planck_keycodes {
-    DEFAULT = SAFE_RANGE,
-    DYNAMIC_MACRO_RANGE,    
-};
-//#include "dynamic_macro.h"
 
 enum function_id {
     SHIFT_ESC,
@@ -392,39 +384,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
 
-#if 0
-/* Keymap _DYN: Dynamic Macro Layer
-   * ,------------------------------------------------------------------------.
-   * |  RA  |Rec1|    |    |    |    |    |    |    |    |    |    |    |     |
-   * |------------------------------------------------------------------------|
-   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
-   * |------------------------------------------------------------------------|
-   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
-   * |------------------------------------------------------------------------|
-   * |         |    |    |    |    |    |    |    |    |    |    |            |
-   * |------------------------------------------------------------------------|
-   * |     |     |     |             Play1            |     |     |     |     |
-   * `------------------------------------------------------------------------'
-   *
-   * Foot switches:
-   *                ,--------.         ,--------.
-   *                |        |         |        |
-   *                |        |         |        |
-   *                `--------'         `--------'
-   */
-
-[_DYN] = KEYMAP_ANSI_FOOTSWITCHES(
-  F(REDALERT_ENABLE), /*DYN_REC_START1*/ _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-  _______, /*DYN_MACRO_PLAY1*/ _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, \
-  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
-  _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
-  _______, _______),
-#endif
-
 /* Keymap 
    * ,------------------------------------------------------------------------.
-   * |Abort |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * |Abort |Mod1|Mod2|Mod3|Mod4|Mod5|    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
    * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
@@ -447,8 +409,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              XXXXXXX, XXXXXXX, XXXXXXX, _______, \
-  XXXXXXX, /*DYN_MACRO_PLAY1*/ F(REDALERT_EXECUTE)),
+  XXXXXXX, XXXXXXX, XXXXXXX,                          XXXXXXX,                              _______, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, F(REDALERT_EXECUTE)),
 
 //
 // Template:
@@ -951,21 +913,45 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
 
                 switch (red_alert.current)
                 {
-                    case 1:
+                    case 1: // Enter
                         macro = MACRO( I(150), 
                             T(ENT),
                             END );
                         break;
-                    case 2:
+                    case 2: // Ctrl+V, Enter
                         macro = MACRO( I(150), 
                             D(LCTL), D(LCTL), T(V), U(LCTL), T(ENT),
                             END );
                         break;
-                    case 3:
+                    case 3: // Alt+S
                         macro = MACRO( I(150), 
                             D(LALT), D(LALT), T(S), U(LALT), 
                             END );
                         break;
+                    case 4: // Celebrate!
+                     	macro = MACRO( I(150), 
+                            D(LGUI), D(LGUI), T(R), U(LGUI), 
+                            W(200),
+                            // http://bit.ly/2mwXeCb
+                            I(20),
+                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH), 
+                            T(B), T(I), T(T), T(DOT), T(L), T(Y), T(SLSH),
+                            T(2), T(M), T(W), D(LSFT), T(X), U(LSFT), T(E), D(LSFT), T(C), U(LSFT), T(B),
+                            T(ENT),
+                            END );
+                        break;
+                    case 5: // Rocket launch
+                    	macro = MACRO( I(150), 
+                            D(LGUI), D(LGUI), T(R), U(LGUI), 
+                            W(200),
+                    		// http://bit.ly/2lRvHOO
+                            I(20),
+                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH), 
+                            T(B), T(I), T(T), T(DOT), T(L), T(Y), T(SLSH),
+                            T(2), T(L), D(LSFT), T(R), U(LSFT), T(V), D(LSFT), T(H), T(O), T(O), U(LSFT),
+                            T(ENT),
+                            END );
+                    	break;
                     default:
                         macro = MACRO(END);
                 }
@@ -1022,12 +1008,3 @@ void matrix_init_user()
 {
     debug_enable = false;
 }
-
-// bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-
-//     if (!process_record_dynamic_macro(keycode, record)) {
-//         return false;
-//     }
-
-//     return true;
-// }
