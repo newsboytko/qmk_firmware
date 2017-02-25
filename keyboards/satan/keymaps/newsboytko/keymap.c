@@ -38,6 +38,7 @@ enum function_id {
     MAC_TASKSWITCH_SELECT,
     MAC_TASKSWITCH_CANCEL,
     ONSTAGE_ENABLE,
+    ONSTAGE_CANCEL,
     ONSTAGE_PLAYSTOP,
     ONSTAGE_STOP,
     ONSTAGE_SELECT_SONG,
@@ -360,9 +361,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * ,------------------------------------------------------------------------.
    * | Exit | C  | C# | D  | D# | E  | F  | F# | G  | G# | A  |Brt-|Brt+|     |
    * |------------------------------------------------------------------------|
-   * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
+   * | Next |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
-   * |       |    |    |    |    |    |    |    |    |    |    |    |Play Next|
+   * |       |    |    |    |    |    |    |    |    |    |    |    |         |
    * |------------------------------------------------------------------------|
    * |  Shift  |    |    |    |    |    |    |    |    |    |    |    Shift   |
    * |------------------------------------------------------------------------|
@@ -377,9 +378,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
 
 [_ML_ONSTAGE] = KEYMAP_ANSI_FOOTSWITCHES(
-  TG(_ML_ONSTAGE), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), F(ONSTAGE_BRIGHTD), F(ONSTAGE_BRIGHTU), XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          F(ONSTAGE_PLAY_NEXT_SONG), \
+  F(ONSTAGE_CANCEL), F(ONSTAGE_SELECT_SONG_1), F(ONSTAGE_SELECT_SONG_2), F(ONSTAGE_SELECT_SONG_3), F(ONSTAGE_SELECT_SONG_4), F(ONSTAGE_SELECT_SONG_5), F(ONSTAGE_SELECT_SONG_6), F(ONSTAGE_SELECT_SONG_7), F(ONSTAGE_SELECT_SONG_8), F(ONSTAGE_SELECT_SONG_9), F(ONSTAGE_SELECT_SONG_10), F(ONSTAGE_BRIGHTD), F(ONSTAGE_BRIGHTU), XXXXXXX, \
+  F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
   KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_RSFT, \
   F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
@@ -458,6 +459,7 @@ const uint16_t PROGMEM fn_actions[] = {
   [MAC_TASKSWITCH_SELECT] = ACTION_FUNCTION(MAC_TASKSWITCH_SELECT),
   [MAC_TASKSWITCH_CANCEL] = ACTION_FUNCTION(MAC_TASKSWITCH_CANCEL),
   [ONSTAGE_ENABLE] = ACTION_FUNCTION(ONSTAGE_ENABLE),
+  [ONSTAGE_CANCEL] = ACTION_FUNCTION(ONSTAGE_CANCEL),
   [ONSTAGE_PLAYSTOP] = ACTION_FUNCTION(ONSTAGE_PLAYSTOP),
   [ONSTAGE_STOP] = ACTION_FUNCTION(ONSTAGE_STOP),
   [ONSTAGE_SELECT_SONG_1] = ACTION_FUNCTION_OPT(ONSTAGE_SELECT_SONG, 0),
@@ -747,6 +749,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 midi_onstage.song_status_leds[9] = 0;
 
                 rgblight_enable();
+                rgblight_mode(1); // solid color
                 midi_onstage_set_playing(false);
                 midi_onstage_set_song(0);
 
@@ -756,6 +759,17 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             }
 
             break;
+        }
+        case ONSTAGE_CANCEL:
+        {
+        	if (record->event.pressed)
+        	{
+        		rgblight_toggle();
+        		rgblight_mode(0);
+        		layer_off(_ML_ONSTAGE);
+        	}
+
+        	break;
         }
         case ONSTAGE_PLAYSTOP:
         {
