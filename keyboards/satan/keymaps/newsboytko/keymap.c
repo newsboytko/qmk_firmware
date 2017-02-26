@@ -533,6 +533,9 @@ struct {
 
 void midi_onstage_set_playing(bool playing)
 {
+    // cancel the delay start timer if it is running
+    midi_onstage.delay_start_timer = 0;
+
     midi_onstage.playing = playing;
     const hsv_color_t* color = playing ? &midi_onstage.playing_color : &midi_onstage.stopped_color;
 
