@@ -504,6 +504,7 @@ void persistent_default_layer_set(uint16_t default_layer)
 #define MIDI_ONSTAGE_COLOR_VAL_STEP 0.1
 #define MIDI_ONSTAGE_PLAY_NEXT_SONG_TIMEOUT 5000
 #define MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT 16000
+#define MIDI_ONSTAGE_DELAY_START_PULSE_DURATION 100
 
 typedef struct {
     uint8_t hue;
@@ -522,6 +523,7 @@ struct {
     hsv_color_t playing_color;
     hsv_color_t song_color;
     hsv_color_t next_song_warning_color;
+    hsv_color_t delay_start_color;
     LED_TYPE* play_status_leds[MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT];
     LED_TYPE* song_status_leds[MIDI_ONSTAGE_SONG_COUNT];
     uint16_t next_song_timer;
@@ -730,6 +732,10 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 midi_onstage.next_song_warning_color.hue = 120;
                 midi_onstage.next_song_warning_color.sat = 255;
                 midi_onstage.next_song_warning_color.val = 255;
+
+                midi_onstage.delay_start_color.hue = 240;
+                midi_onstage.delay_start_color.sat = 255;
+                midi_onstage.delay_start_color.val = 255;
 
                 midi_onstage.play_status_leds[0] = &led[7];
                 midi_onstage.play_status_leds[1] = &led[8];
@@ -1041,14 +1047,38 @@ void matrix_init_user()
 
 void matrix_scan_user()
 {
-    if (midi_onstage.delay_start_timer != 0 && timer_elapsed(midi_onstage.delay_start_timer) >= MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT)
+    if (midi_onstage.delay_start_timer != 0)
     {
-        midi_onstage.delay_start_timer = 0;
-        midi_onstage_set_song(midi_onstage.delay_start_song);
-        midi_onstage_set_playing(true);
-        // start the song
-        uint8_t note = midi_onstage.songs[midi_onstage.current_song];
-        midi_send_noteon(&midi_device, midi_config.channel, note, 127);
-        midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+        uint16_t elapsed = timer_elapsed(midi_onstage.delay_start_timer);
+        if (elapsed >= MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT)
+        {
+            midi_onstage.delay_start_timer = 0;
+            midi_onstage_set_song(midi_onstage.delay_start_song);
+            midi_onstage_set_playing(true);
+            // start the song
+            uint8_t note = midi_onstage.songs[midi_onstage.current_song];
+            midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+            midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+        }
+        else
+        {
+            float scale = 1.0f;
+            if (elapsed % 1000 > MIDI_ONSTAGE_DELAY_START_PULSE_DURATION)
+            {
+                scale = (float)(MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT - elapsed) / MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT;
+            }
+
+            for (uint8_t i=0; i < MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT; i++)
+            {
+                sethsv(
+                    midi_onstage.delay_start_color.hue,
+                    midi_onstage.delay_start_color.sat,
+                    scale * midi_onstage.delay_start_color.val * midi_onstage.color_val_scale,
+                    midi_onstage.play_status_leds[i]);
+            }
+
+            rgblight_set();
+        }
+
     }
 }
