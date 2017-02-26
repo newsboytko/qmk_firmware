@@ -707,12 +707,19 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
             if (record->event.pressed)
             {
                 midi_init();
-                midi_onstage.stop_note = midi_compute_note(MI_C_2);
 
-                for (uint8_t i = 0; i < MIDI_ONSTAGE_SONG_COUNT; i++)
-                {
-                    midi_onstage.songs[i] = midi_compute_note(MIDI_TONE_MIN + i);
-                }
+                // Set notes to match the Arturia BeatStep controller that is normally used at OCC
+                midi_onstage.stop_note = 37; // C#1
+                midi_onstage.songs[0] = 44; // G#1
+                midi_onstage.songs[1] = 45; // A1
+                midi_onstage.songs[2] = 46; // A#1
+                midi_onstage.songs[3] = 47; // B1
+                midi_onstage.songs[4] = 48; // C2
+                midi_onstage.songs[5] = 49; // C#2
+                midi_onstage.songs[6] = 50; // D2
+                midi_onstage.songs[7] = 51; // D#2
+                midi_onstage.songs[8] = 38; // D1
+                midi_onstage.songs[9] = 39; // D#1
 
                 midi_onstage.color_val_scale = 0.8f;
 
