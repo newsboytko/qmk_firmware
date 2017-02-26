@@ -182,7 +182,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   _______, _______, _______, _______, _______, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPRV, KC_MNXT, KC_MSTP,                  _______, \
   _______, _______, _______,                            KC_MPLY,                            _______, _______, _______, _______, \
   _______, _______),
-  
+
 /* Keymap _RL: Extended Function Layer
    * ,------------------------------------------------------------------------.
    * |    |    |    |    |    |    |    |    |    |    |    |    |    | RESET |
@@ -245,7 +245,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_LEFT), LGUI(KC_RGHT), LGUI(KC_UP), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
   _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
-  _______, _______), 
+  _______, _______),
 
 /* Keymap _GL_WINDOWS_TASKSWITCH: GUI Layer for Windows Task Switcher
    * ,------------------------------------------------------------------------.
@@ -300,7 +300,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCAG(KC_LEFT), LCAG(KC_RGHT), LCAG(KC_M), \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______, \
   _______, _______, _______,                          _______,                              _______, _______, _______, _______, \
-  _______, _______), 
+  _______, _______),
 
 /* Keymap _GL_MAC_TASKSWITCH: GUI Layer for Mac Task Switcher
    * ,------------------------------------------------------------------------.
@@ -382,10 +382,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, \
   KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_RSFT, \
-  F(ONSTAGE_STOP), XXXXXXX, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
+  F(ONSTAGE_STOP), KC_LALT, XXXXXXX,                          F(ONSTAGE_PLAYSTOP),                              XXXXXXX, XXXXXXX, XXXXXXX, F(ONSTAGE_STOP), \
   F(ONSTAGE_PLAY_NEXT_SONG), XXXXXXX),
 
-/* Keymap 
+/* Keymap
    * ,------------------------------------------------------------------------.
    * |Abort |Mod1|Mod2|Mod3|Mod4|Mod5|    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
@@ -417,7 +417,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Template:
 //
 #if 0
-/* Keymap 
+/* Keymap
    * ,------------------------------------------------------------------------.
    * |      |    |    |    |    |    |    |    |    |    |    |    |    |     |
    * |------------------------------------------------------------------------|
@@ -487,6 +487,7 @@ const uint16_t PROGMEM fn_actions[] = {
 
 // Used for SHIFT_ESC
 #define MODS_SHIFT_MASK  (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
+#define MODS_ALT_MASK  (MOD_BIT(KC_LALT)|MOD_BIT(KC_RALT))
 
 // used for NEXT_DEFAULT_LAYER
 extern uint32_t default_layer_state;
@@ -502,6 +503,7 @@ void persistent_default_layer_set(uint16_t default_layer)
 #define MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT 9
 #define MIDI_ONSTAGE_COLOR_VAL_STEP 0.1
 #define MIDI_ONSTAGE_PLAY_NEXT_SONG_TIMEOUT 5000
+#define MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT 16000
 
 typedef struct {
     uint8_t hue;
@@ -523,6 +525,8 @@ struct {
     LED_TYPE* play_status_leds[MIDI_ONSTAGE_PLAY_STATUS_LED_COUNT];
     LED_TYPE* song_status_leds[MIDI_ONSTAGE_SONG_COUNT];
     uint16_t next_song_timer;
+    uint8_t delay_start_song;
+    uint16_t delay_start_timer;
 } midi_onstage;
 
 void midi_onstage_set_playing(bool playing)
@@ -583,8 +587,8 @@ void cancel_red_alert(void)
 }
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
-    uint8_t shift_pressed;
-    shift_pressed = get_mods() & MODS_SHIFT_MASK;
+    uint8_t shift_pressed = get_mods() & MODS_SHIFT_MASK;
+    uint8_t alt_pressed = get_mods() & MODS_ALT_MASK;
     switch (id) {
         case SHIFT_ESC:
         {
@@ -630,7 +634,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 unregister_code(KC_TAB);
                 layer_on(_GL_WINDOWS_TASKSWITCH);
             }
-            
+
             break;
         }
         case WINDOWS_TASKSWITCH_SELECT:
@@ -641,7 +645,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 layer_off(_GL_WINDOWS_TASKSWITCH);
                 layer_off(_GL_WINDOWS);
             }
-            
+
             break;
         }
         case WINDOWS_TASKSWITCH_CANCEL:
@@ -654,7 +658,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 layer_off(_GL_WINDOWS_TASKSWITCH);
                 layer_off(_GL_WINDOWS);
             }
-            
+
             break;
         }
         case MAC_TASKSWITCH_ENABLE:
@@ -666,7 +670,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 unregister_code(KC_TAB);
                 layer_on(_GL_MAC_TASKSWITCH);
             }
-            
+
             break;
         }
         case MAC_TASKSWITCH_SELECT:
@@ -677,7 +681,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 layer_off(_GL_MAC_TASKSWITCH);
                 layer_off(_GL_MAC);
             }
-            
+
             break;
         }
         case MAC_TASKSWITCH_CANCEL:
@@ -690,7 +694,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 layer_off(_GL_MAC_TASKSWITCH);
                 layer_off(_GL_MAC);
             }
-            
+
             break;
         }
         case ONSTAGE_ENABLE:
@@ -714,7 +718,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 midi_onstage.stopped_color.hue = 0;
                 midi_onstage.stopped_color.sat = 255;
                 midi_onstage.stopped_color.val = 255;
-                
+
                 midi_onstage.playing_color.hue = 0;
                 midi_onstage.playing_color.sat = 0;
                 midi_onstage.playing_color.val = 100;
@@ -755,6 +759,9 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
 
                 midi_onstage.next_song_timer = 0;
 
+                midi_onstage.delay_start_song = 0;
+                midi_onstage.delay_start_timer = 0;
+
                 layer_on(_ML_ONSTAGE);
             }
 
@@ -762,14 +769,15 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         }
         case ONSTAGE_CANCEL:
         {
-        	if (record->event.pressed)
-        	{
-        		rgblight_toggle();
-        		rgblight_mode(0);
-        		layer_off(_ML_ONSTAGE);
-        	}
+            if (record->event.pressed)
+            {
+                rgblight_toggle();
+                rgblight_mode(0);
+                midi_onstage.delay_start_timer = 0;
+                layer_off(_ML_ONSTAGE);
+            }
 
-        	break;
+            break;
         }
         case ONSTAGE_PLAYSTOP:
         {
@@ -809,16 +817,24 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         {
             if (record->event.pressed)
             {
-                midi_onstage_set_song(opt);
-                midi_onstage.next_song_timer = 0;
-
-                if (!shift_pressed)
+                if (alt_pressed)
                 {
-                    // start the song
-                    uint8_t note = midi_onstage.songs[midi_onstage.current_song];
-                    midi_send_noteon(&midi_device, midi_config.channel, note, 127);
-                    midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
-                    midi_onstage_set_playing(true);
+                    midi_onstage.delay_start_timer = timer_read();
+                    midi_onstage.delay_start_song = opt;
+                }
+                else
+                {
+                    midi_onstage_set_song(opt);
+                    midi_onstage.next_song_timer = 0;
+
+                    if (!shift_pressed)
+                    {
+                        // start the song
+                        uint8_t note = midi_onstage.songs[midi_onstage.current_song];
+                        midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+                        midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+                        midi_onstage_set_playing(true);
+                    }
                 }
             }
 
@@ -928,44 +944,44 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 switch (red_alert.current)
                 {
                     case 1: // Enter
-                        macro = MACRO( I(150), 
+                        macro = MACRO( I(150),
                             T(ENT),
                             END );
                         break;
                     case 2: // Ctrl+V, Enter
-                        macro = MACRO( I(150), 
+                        macro = MACRO( I(150),
                             D(LCTL), D(LCTL), T(V), U(LCTL), T(ENT),
                             END );
                         break;
                     case 3: // Alt+S
-                        macro = MACRO( I(150), 
-                            D(LALT), D(LALT), T(S), U(LALT), 
+                        macro = MACRO( I(150),
+                            D(LALT), D(LALT), T(S), U(LALT),
                             END );
                         break;
                     case 4: // Celebrate!
-                     	macro = MACRO( I(150), 
-                            D(LGUI), D(LGUI), T(R), U(LGUI), 
+                        macro = MACRO( I(150),
+                            D(LGUI), D(LGUI), T(R), U(LGUI),
                             W(200),
                             // http://bit.ly/2mwXeCb
                             I(20),
-                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH), 
+                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH),
                             T(B), T(I), T(T), T(DOT), T(L), T(Y), T(SLSH),
                             T(2), T(M), T(W), D(LSFT), T(X), U(LSFT), T(E), D(LSFT), T(C), U(LSFT), T(B),
                             T(ENT),
                             END );
                         break;
                     case 5: // Rocket launch
-                    	macro = MACRO( I(150), 
-                            D(LGUI), D(LGUI), T(R), U(LGUI), 
+                        macro = MACRO( I(150),
+                            D(LGUI), D(LGUI), T(R), U(LGUI),
                             W(200),
-                    		// http://bit.ly/2lRvHOO
+                            // http://bit.ly/2lRvHOO
                             I(20),
-                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH), 
+                            T(H), T(T), T(T), T(P), D(LSFT), T(SCLN), U(LSFT), T(SLSH), T(SLSH),
                             T(B), T(I), T(T), T(DOT), T(L), T(Y), T(SLSH),
                             T(2), T(L), D(LSFT), T(R), U(LSFT), T(V), D(LSFT), T(H), T(O), T(O), U(LSFT),
                             T(ENT),
                             END );
-                    	break;
+                        break;
                     default:
                         macro = MACRO(END);
                 }
@@ -994,11 +1010,11 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
         {
             if (record->event.pressed)
             {
-                return MACRO( I(20), 
-                    T(S), T(D), T(SPACE), 
-                    T(S), T(U), T(B), T(M), T(I), T(T), T(SPACE), 
-                    T(MINS), D(LSFT), T(C), U(LSFT), T(SPACE), 
-                    D(LSFT), T(QUOT), T(Y), T(O), T(L), T(O), T(QUOT), U(LSFT), T(ENT), 
+                return MACRO( I(20),
+                    T(S), T(D), T(SPACE),
+                    T(S), T(U), T(B), T(M), T(I), T(T), T(SPACE),
+                    T(MINS), D(LSFT), T(C), U(LSFT), T(SPACE),
+                    D(LSFT), T(QUOT), T(Y), T(O), T(L), T(O), T(QUOT), U(LSFT), T(ENT),
                     END );
             }
             break;
@@ -1007,7 +1023,7 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
         {
             if (record->event.pressed)
             {
-                return MACRO( I(150), 
+                return MACRO( I(150),
                     D(LCTL), D(LCTL), T(V), U(LCTL), T(ENT),
                     END );
             }
@@ -1021,4 +1037,18 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 void matrix_init_user()
 {
     debug_enable = false;
+}
+
+void matrix_scan_user()
+{
+    if (midi_onstage.delay_start_timer != 0 && timer_elapsed(midi_onstage.delay_start_timer) >= MIDI_ONSTAGE_DELAY_START_SONG_TIMEOUT)
+    {
+        midi_onstage.delay_start_timer = 0;
+        midi_onstage_set_song(midi_onstage.delay_start_song);
+        midi_onstage_set_playing(true);
+        // start the song
+        uint8_t note = midi_onstage.songs[midi_onstage.current_song];
+        midi_send_noteon(&midi_device, midi_config.channel, note, 127);
+        midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+    }
 }
