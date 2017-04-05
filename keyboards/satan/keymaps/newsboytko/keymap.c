@@ -354,7 +354,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   MI_CHU,  XXXXXXX, MI_Cs,   MI_Ds,   XXXXXXX, MI_Fs,   MI_Gs,   MI_As,   XXXXXXX, MI_Cs_1, MI_Ds_1, XXXXXXX, XXXXXXX, XXXXXXX, \
   MI_MOD,  MI_C,    MI_D,    MI_E,    MI_F,    MI_G,    MI_A,    MI_B,    MI_C_1,  MI_D_1,  MI_E_1,  MI_F_1,           F(ONSTAGE_ENABLE), \
   MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, MI_TRNSD, MI_TRNSU, MI_TRNS_0,             MI_SUS, \
-  _______, _______, _______,                          MI_OFF,                               _______, _______, _______, _______, \
+  _______, _______, _______,                        MI_ALLOFF,                              _______, _______, _______, _______, \
   _______, _______),
 
 /* Keymap _ML_ONSTAGE: MIDI Layer for performance on stage
@@ -706,8 +706,6 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
         {
             if (record->event.pressed)
             {
-                midi_init();
-
                 // Set notes to match the Arturia BeatStep controller that is normally used at OCC
                 midi_onstage.stop_note = 37; // C#1
                 midi_onstage.songs[0] = 44; // G#1
