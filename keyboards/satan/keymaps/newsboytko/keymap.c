@@ -2,10 +2,7 @@
 #include "process_midi.h"
 #include "rgblight.h"
 #include "timer.h"
-
-// Readability
-#define _______ KC_TRNS
-#define XXXXXXX KC_NO
+#include "keymap_common.h"
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
 // The underscores don't mean anything - you can have a layer called STUFF or any other name.
@@ -13,7 +10,7 @@
 // entirely and just use numbers.
 enum layer_id
 {
-    _DL_WINDOWS,
+    _DL_WINDOWS = common_layer_id_max,
     _DL_MAC,
     _DL_KIDS,
     _DL_MAX,
@@ -74,6 +71,8 @@ enum macro_id {
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+DEFINE_COMMON_LAYERS(),
 
   /* Keymap _DL_WINDOWS: Default Layer for Windows
    * ,------------------------------------------------------------------------.
