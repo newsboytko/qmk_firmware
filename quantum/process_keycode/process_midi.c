@@ -1,4 +1,44 @@
+/* Copyright 2016 Jack Humbert
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "process_midi.h"
+
+#ifdef MIDI_ENABLE
+#include "midi.h"
+
+#ifdef MIDI_BASIC
+
+void process_midi_basic_noteon(uint8_t note) 
+{
+    midi_send_noteon(&midi_device, 0, note, 128);
+}
+
+void process_midi_basic_noteoff(uint8_t note)
+{
+    midi_send_noteoff(&midi_device, 0, note, 0);
+}
+
+void process_midi_all_notes_off(void)
+{
+    midi_send_cc(&midi_device, 0, 0x7B, 0);
+}
+
+#endif // MIDI_BASIC
+
+#ifdef MIDI_ADVANCED
+
 #include "timer.h"
 
 static uint8_t tone_status[MIDI_TONE_COUNT];
@@ -159,10 +199,10 @@ bool process_midi(uint16_t keycode, keyrecord_t *record)
                 dprintf("midi channel %d\n", midi_config.channel);
             }
             return false;
-        case MI_OFF:
+        case MI_ALLOFF:
             if (record->event.pressed) {
                 midi_send_cc(&midi_device, midi_config.channel, 0x7B, 0);
-                dprintf("midi off\n");
+                dprintf("midi all notes off\n");
             }
             return false;
         case MI_SUS:
@@ -207,3 +247,7 @@ bool process_midi(uint16_t keycode, keyrecord_t *record)
 
     return true;
 }
+
+#endif // MIDI_ADVANCED
+
+#endif // MIDI_ENABLE

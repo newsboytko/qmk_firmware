@@ -1,6 +1,30 @@
-
+/* Copyright 2016-2017 Jack Humbert
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef QUANTUM_KEYCODES_H
 #define QUANTUM_KEYCODES_H
+
+#ifndef MIDI_ENABLE_STRICT
+#define MIDI_ENABLE_STRICT 0
+#endif
+
+#if !MIDI_ENABLE_STRICT || (defined(MIDI_ENABLE) && defined(MIDI_ADVANCED))
+#ifndef MIDI_TONE_KEYCODE_OCTAVES
+#define MIDI_TONE_KEYCODE_OCTAVES 3
+#endif
+#endif
 
 enum quantum_keycodes {
     // Ranges used in shortucuts - not to be used directly
@@ -107,11 +131,16 @@ enum quantum_keycodes {
     MUV_IN,
     MUV_DE,
 
-#ifdef MIDI_ENABLE
     // Midi
+#if !MIDI_ENABLE_STRICT || (defined(MIDI_ENABLE) && defined(MIDI_BASIC))
+    MI_ON,  // send midi notes when music mode is enabled
+    MI_OFF, // don't send midi notes when music mode is enabled
+#endif
 
+#if !MIDI_ENABLE_STRICT || (defined(MIDI_ENABLE) && defined(MIDI_ADVANCED))
     MIDI_TONE_MIN,
 
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 0
     MI_C = MIDI_TONE_MIN,
     MI_Cs,
     MI_Db = MI_Cs,
@@ -129,7 +158,9 @@ enum quantum_keycodes {
     MI_As,
     MI_Bb = MI_As,
     MI_B,
+#endif
 
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 1
     MI_C_1,
     MI_Cs_1,
     MI_Db_1 = MI_Cs_1,
@@ -147,7 +178,9 @@ enum quantum_keycodes {
     MI_As_1,
     MI_Bb_1 = MI_As_1,
     MI_B_1,
+#endif
 
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 2
     MI_C_2,
     MI_Cs_2,
     MI_Db_2 = MI_Cs_2,
@@ -165,8 +198,81 @@ enum quantum_keycodes {
     MI_As_2,
     MI_Bb_2 = MI_As_2,
     MI_B_2,
+#endif
 
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 3
+    MI_C_3,
+    MI_Cs_3,
+    MI_Db_3 = MI_Cs_3,
+    MI_D_3,
+    MI_Ds_3,
+    MI_Eb_3 = MI_Ds_3,
+    MI_E_3,
+    MI_F_3,
+    MI_Fs_3,
+    MI_Gb_3 = MI_Fs_3,
+    MI_G_3,
+    MI_Gs_3,
+    MI_Ab_3 = MI_Gs_3,
+    MI_A_3,
+    MI_As_3,
+    MI_Bb_3 = MI_As_3,
+    MI_B_3,
+#endif
+
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 4
+    MI_C_4,
+    MI_Cs_4,
+    MI_Db_4 = MI_Cs_4,
+    MI_D_4,
+    MI_Ds_4,
+    MI_Eb_4 = MI_Ds_4,
+    MI_E_4,
+    MI_F_4,
+    MI_Fs_4,
+    MI_Gb_4 = MI_Fs_4,
+    MI_G_4,
+    MI_Gs_4,
+    MI_Ab_4 = MI_Gs_4,
+    MI_A_4,
+    MI_As_4,
+    MI_Bb_4 = MI_As_4,
+    MI_B_4,
+#endif
+
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 5
+    MI_C_5,
+    MI_Cs_5,
+    MI_Db_5 = MI_Cs_5,
+    MI_D_5,
+    MI_Ds_5,
+    MI_Eb_5 = MI_Ds_5,
+    MI_E_5,
+    MI_F_5,
+    MI_Fs_5,
+    MI_Gb_5 = MI_Fs_5,
+    MI_G_5,
+    MI_Gs_5,
+    MI_Ab_5 = MI_Gs_5,
+    MI_A_5,
+    MI_As_5,
+    MI_Bb_5 = MI_As_5,
+    MI_B_5,
+#endif
+
+#if !MIDI_ENABLE_STRICT || MIDI_TONE_KEYCODE_OCTAVES > 5
+    MIDI_TONE_MAX = MI_B_5,
+#elif MIDI_TONE_KEYCODE_OCTAVES > 4
+    MIDI_TONE_MAX = MI_B_4,
+#elif MIDI_TONE_KEYCODE_OCTAVES > 3
+    MIDI_TONE_MAX = MI_B_3,
+#elif MIDI_TONE_KEYCODE_OCTAVES > 2
     MIDI_TONE_MAX = MI_B_2,
+#elif MIDI_TONE_KEYCODE_OCTAVES > 1
+    MIDI_TONE_MAX = MI_B_1,
+#elif MIDI_TONE_KEYCODE_OCTAVES > 0
+    MIDI_TONE_MAX = MI_B,
+#endif
 
     MIDI_OCTAVE_MIN,
     MI_OCT_N2 = MIDI_OCTAVE_MIN,
@@ -237,7 +343,7 @@ enum quantum_keycodes {
     MI_CHD, // previous channel
     MI_CHU, // next channel
 
-    MI_OFF, // all notes off
+    MI_ALLOFF, // all notes off
 
     MI_SUS, // sustain
     MI_PORT, // portamento
@@ -248,7 +354,7 @@ enum quantum_keycodes {
     MI_MOD, // modulation
     MI_MODSD, // decrease modulation speed
     MI_MODSU, // increase modulation speed
-#endif
+#endif // MIDI_ADVANCED
 
     // Backlight functionality
     BL_0,
@@ -298,9 +404,6 @@ enum quantum_keycodes {
 #ifdef BLUETOOTH_ENABLE
     OUT_BT,
 #endif
-#ifdef ADAFRUIT_BLE_ENABLE
-    OUT_BLE,
-#endif
 
     // always leave at the end
     SAFE_RANGE
@@ -322,6 +425,7 @@ enum quantum_keycodes {
 #define ALTG(kc) (kc | QK_RCTL | QK_RALT)
 #define SCMD(kc) (kc | QK_LGUI | QK_LSFT)
 #define SWIN(kc) SCMD(kc)
+#define LCA(kc) (kc | QK_LCTL | QK_LALT)
 
 #define MOD_HYPR 0xf
 #define MOD_MEH 0x7
@@ -475,6 +579,7 @@ enum quantum_keycodes {
 #define ALL_T(kc) MT((MOD_LCTL | MOD_LSFT | MOD_LALT | MOD_LGUI), kc) // see http://brettterpstra.com/2012/12/08/a-useful-caps-lock-key/
 #define SCMD_T(kc) MT((MOD_LGUI | MOD_LSFT), kc)
 #define SWIN_T(kc) SCMD_T(kc)
+#define LCA_T(kc) MT((MOD_LCTL | MOD_LALT), kc) // Left control and left alt
 
 // Dedicated keycode versions for Hyper and Meh, if you want to use them as standalone keys rather than mod-tap
 #define KC_HYPR HYPR(KC_NO)
