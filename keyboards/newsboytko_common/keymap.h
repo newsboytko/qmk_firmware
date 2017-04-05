@@ -9,9 +9,22 @@
 enum common_layer_id {
     common_layer_default_windows,
     common_layer_default_mac,
-    common_layer_fn,
+    common_layer_default_max,
+    common_layer_fn = common_layer_default_max,
     common_layer_fn_ext,
     common_layer_id_max
+};
+
+enum common_fn_id {
+    common_fn_shift_esc,
+    common_fn_next_default_layer,
+    WINDOWS_TASKSWITCH_ENABLE,
+    WINDOWS_TASKSWITCH_SELECT,
+    WINDOWS_TASKSWITCH_CANCEL,
+    MAC_TASKSWITCH_ENABLE,
+    MAC_TASKSWITCH_SELECT,
+    MAC_TASKSWITCH_CANCEL,
+    common_fn_id_max
 };
 
 #define DEFINE_COMMON_LAYERS() \
@@ -41,7 +54,7 @@ enum common_layer_id {
 */ \
 [common_layer_default_windows] = KEYMAP_COMMON(\
        KC_ESC,  KC_F1,  KC_F2,  KC_F3,  KC_F4,  KC_F5,  KC_F6,  KC_F7,  KC_F8,  KC_F9, KC_F10, KC_F11, KC_F12,          KC_PSCR,KC_SLCK,KC_PAUS,                        \
-       KC_GRV,   KC_1,   KC_2,   KC_3,   KC_4,   KC_5,   KC_6,   KC_7,   KC_8,   KC_9,   KC_0,KC_MINS, KC_EQL,KC_BSPC,   KC_INS,KC_HOME,KC_PGUP,  KC_NLCK,KC_PSLS,KC_PAST,KC_PMNS, \
+       F(common_fn_shift_esc),   KC_1,   KC_2,   KC_3,   KC_4,   KC_5,   KC_6,   KC_7,   KC_8,   KC_9,   KC_0,KC_MINS, KC_EQL,KC_BSPC,   KC_INS,KC_HOME,KC_PGUP,  KC_NLCK,KC_PSLS,KC_PAST,KC_PMNS, \
        KC_TAB,   KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,   KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,KC_LBRC,KC_RBRC,KC_BSLS,   KC_DEL, KC_END,KC_PGDN,    KC_P7,  KC_P8,  KC_P9,KC_PPLS, \
       MO(common_layer_fn),   KC_A,   KC_S,   KC_D,   KC_F,   KC_G,   KC_H,   KC_J,   KC_K,   KC_L,KC_SCLN,KC_QUOT,         KC_ENT,                              KC_P4,  KC_P5,  KC_P6,      \
       KC_LSFT,KC_NUBS,   KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,   KC_N,   KC_M,KC_COMM, KC_DOT,KC_SLSH,        KC_RSFT,            KC_UP,            KC_P1,  KC_P2,  KC_P3,KC_PENT, \
@@ -73,7 +86,7 @@ enum common_layer_id {
 */ \
 [common_layer_default_mac] = KEYMAP_COMMON(\
        KC_ESC,  KC_F1,  KC_F2,  KC_F3,  KC_F4,  KC_F5,  KC_F6,  KC_F7,  KC_F8,  KC_F9, KC_F10, KC_F11, KC_F12,          KC_PSCR,KC_SLCK,KC_PAUS,                        \
-       KC_GRV,   KC_1,   KC_2,   KC_3,   KC_4,   KC_5,   KC_6,   KC_7,   KC_8,   KC_9,   KC_0,KC_MINS, KC_EQL,KC_BSPC,   KC_INS,KC_HOME,KC_PGUP,  KC_NLCK,KC_PSLS,KC_PAST,KC_PMNS, \
+       F(common_fn_shift_esc),   KC_1,   KC_2,   KC_3,   KC_4,   KC_5,   KC_6,   KC_7,   KC_8,   KC_9,   KC_0,KC_MINS, KC_EQL,KC_BSPC,   KC_INS,KC_HOME,KC_PGUP,  KC_NLCK,KC_PSLS,KC_PAST,KC_PMNS, \
        KC_TAB,   KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,   KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,KC_LBRC,KC_RBRC,KC_BSLS,   KC_DEL, KC_END,KC_PGDN,    KC_P7,  KC_P8,  KC_P9,KC_PPLS, \
       MO(common_layer_fn),   KC_A,   KC_S,   KC_D,   KC_F,   KC_G,   KC_H,   KC_J,   KC_K,   KC_L,KC_SCLN,KC_QUOT,         KC_ENT,                              KC_P4,  KC_P5,  KC_P6,      \
       KC_LSFT,KC_NUBS,   KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,   KC_N,   KC_M,KC_COMM, KC_DOT,KC_SLSH,        KC_RSFT,            KC_UP,            KC_P1,  KC_P2,  KC_P3,KC_PENT, \
@@ -86,15 +99,15 @@ enum common_layer_id {
   |    |    |    |    |    |    | |    |    |    |    | |    |    |    |    | |    |    |    |
   `----'    `-------------------' `-------------------' `-------------------' `--------------'
   ,-------------------------------------------------------------------------. ,--------------. ,-------------------.
-  |    |    |    |    |    |    |    |    |    |    |    |    |    |        | |    |    |    | |    |    |    |    |
+  | `  | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | F9 | F10| F11| F12|  Del   | |    |    |    | |    |    |    |    |
   |-------------------------------------------------------------------------| |--------------| |-------------------|
-  |      |    |    |    |    |    |    |    | Up |    |    |    |    |      | |    |    |    | |    |    |    |    |
+  |      |Home| Up |End |PgUp|    |PgUp|Home| Up |End |    |PrSc|ScLk|Pause | |    |    |    | |    |    |    |    |
   |-------------------------------------------------------------------------| '--------------' |--------------     |
-  |       |    |    |    |    |    |    |Left|Down|Rght|    |    |          |                  |    |    |    |    |
+  |       |Left|Down|Rght|PgDn|    |PgDn|Left|Down|Rght|    |Ins |          |                  |    |    |    |    |
   |-------------------------------------------------------------------------|      ,----.      |-------------------|
-  |         |    |    |    |    |    |    |    |    |    |    |             |      |    |      |    |    |    |    |
+  |         |    |    |    |    |    |Mute|Vol-|Vol+|Skp-|Skp+|             |      |    |      |    |    |    |    |
   |-------------------------------------------------------------------------| ,--------------. |--------------     |
-  |    |    |    |                                      |    |    |    |    | |    |    |    | |         |    |    |
+  |    |    |    |              Play/Pause              |    |    |    |    | |    |    |    | |         |    |    |
   `-------------------------------------------------------------------------' `--------------' `-------------------'
 
   Foot switches:
@@ -105,11 +118,11 @@ enum common_layer_id {
 */ \
 [common_layer_fn] = KEYMAP_COMMON(\
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, KC_UP, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, KC_LEFT, KC_DOWN, KC_RGHT, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  _______, _______, _______, _______, _______, _______, _______, \
+    _______, KC_HOME, KC_UP,   KC_END,  KC_PGUP, _______, KC_PGUP, KC_HOME, KC_UP,   KC_END,  _______, KC_PSCR, KC_SLCK, KC_PAUS, _______, _______, _______, _______, _______, _______, _______, \
+    _______, KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, _______, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _______, KC_INS,  _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPRV, KC_MNXT, _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, KC_MPLY, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______), \
 \
 /* Keymap common_layer_fn_ext: Extended Function Layer
@@ -126,7 +139,7 @@ enum common_layer_id {
   |-------------------------------------------------------------------------|      ,----.      |-------------------|
   |         |    |    |    |    |    |    |    |    |    |    |             |      |    |      |    |    |    |    |
   |-------------------------------------------------------------------------| ,--------------. |--------------     |
-  |    |    |    |                                      |    |    |    |    | |    |    |    | |         |    |    |
+  |    |Def+|    |                                      |    |    |    |    | |    |    |    | |         |    |    |
   `-------------------------------------------------------------------------' `--------------' `-------------------'
 
   Foot switches:
@@ -141,7 +154,7 @@ enum common_layer_id {
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, F(common_fn_next_default_layer), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______)
 
 
@@ -180,5 +193,146 @@ enum common_layer_id {
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______)
 #endif
+
+
+#define DEFINE_COMMON_FN_ACTIONS() \
+  [common_fn_shift_esc] = ACTION_FUNCTION(common_fn_shift_esc), \
+  [common_fn_next_default_layer] = ACTION_FUNCTION(common_fn_next_default_layer), \
+  [WINDOWS_TASKSWITCH_ENABLE] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_ENABLE), \
+  [WINDOWS_TASKSWITCH_SELECT] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_SELECT), \
+  [WINDOWS_TASKSWITCH_CANCEL] = ACTION_FUNCTION(WINDOWS_TASKSWITCH_CANCEL), \
+  [MAC_TASKSWITCH_ENABLE] = ACTION_FUNCTION(MAC_TASKSWITCH_ENABLE), \
+  [MAC_TASKSWITCH_SELECT] = ACTION_FUNCTION(MAC_TASKSWITCH_SELECT), \
+  [MAC_TASKSWITCH_CANCEL] = ACTION_FUNCTION(MAC_TASKSWITCH_CANCEL)
+
+// Common modifier masks
+#define MODS_SHIFT_MASK  (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
+
+// used for common_fn_next_default_layer
+extern uint32_t default_layer_state;
+#define MAX_DEFAULT_LAYER_STATE (1UL << common_layer_default_max)
+
+void persistent_default_layer_set(uint16_t default_layer)
+{
+    eeconfig_update_default_layer(default_layer);
+    default_layer_set(default_layer);
+}
+
+bool common_action_function(keyrecord_t* record, uint8_t id, uint8_t opt) {
+    const uint8_t shift_pressed = get_mods() & MODS_SHIFT_MASK;
+    switch (id) {
+        case common_fn_shift_esc:
+        {
+            if (record->event.pressed) {
+                if (shift_pressed) {
+                    add_key(KC_GRV);
+                    send_keyboard_report();
+                } else {
+                    add_key(KC_ESC);
+                    send_keyboard_report();
+                }
+            } else {
+                if (shift_pressed) {
+                    del_key(KC_GRV);
+                    send_keyboard_report();
+                } else {
+                    del_key(KC_ESC);
+                    send_keyboard_report();
+                }
+            }
+            return true;
+        }
+        case common_fn_next_default_layer:
+        {
+            if (record->event.pressed)
+            {
+                if (default_layer_state == 0)
+                {
+                    default_layer_state = 1;
+                }
+                default_layer_state = (default_layer_state << 1) & ~(1UL << common_layer_default_max);
+                dprintf("default_layer_state: 0x%08X\n", default_layer_state);
+                persistent_default_layer_set(default_layer_state);
+            }
+            return true;
+        }
+#if 0
+        case WINDOWS_TASKSWITCH_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                register_code(KC_LALT);
+                register_code(KC_TAB);
+                unregister_code(KC_TAB);
+                layer_on(_GL_WINDOWS_TASKSWITCH);
+            }
+
+            return true;
+        }
+        case WINDOWS_TASKSWITCH_SELECT:
+        {
+            if (record->event.pressed)
+            {
+                unregister_code(KC_LALT);
+                layer_off(_GL_WINDOWS_TASKSWITCH);
+                layer_off(_GL_WINDOWS);
+            }
+
+            return true;
+        }
+        case WINDOWS_TASKSWITCH_CANCEL:
+        {
+            if (record->event.pressed)
+            {
+                add_key(KC_ESC);
+                send_keyboard_report();
+                unregister_code(KC_LALT);
+                layer_off(_GL_WINDOWS_TASKSWITCH);
+                layer_off(_GL_WINDOWS);
+            }
+
+            return true;
+        }
+        case MAC_TASKSWITCH_ENABLE:
+        {
+            if (record->event.pressed)
+            {
+                register_code(KC_LGUI);
+                register_code(KC_TAB);
+                unregister_code(KC_TAB);
+                layer_on(_GL_MAC_TASKSWITCH);
+            }
+
+            return true;
+        }
+        case MAC_TASKSWITCH_SELECT:
+        {
+            if (record->event.pressed)
+            {
+                unregister_code(KC_LGUI);
+                layer_off(_GL_MAC_TASKSWITCH);
+                layer_off(_GL_MAC);
+            }
+
+            return true;
+        }
+        case MAC_TASKSWITCH_CANCEL:
+        {
+            if (record->event.pressed)
+            {
+                add_key(KC_ESC);
+                send_keyboard_report();
+                unregister_code(KC_LGUI);
+                layer_off(_GL_MAC_TASKSWITCH);
+                layer_off(_GL_MAC);
+            }
+
+            return true;
+        }
+#endif
+    }
+
+    return false;
+}
 
 #endif // __COMMON_KEYMAP_H__
