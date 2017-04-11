@@ -46,6 +46,6 @@ KEYMAP( \
   KA4, KP2, KC6,                KK6,                KC0, KM3, KD0, KA1,   KO0, KK0, KL0,   KL6,      KQ6       \
 )
 
-#include "../../../newsboytko_common/keymap.h"
+#include "../../../newsboytko_common/common_keymap.h"
 
 #endif // __FROSTY_FLAKE_KEYMAP_COMMON_H__

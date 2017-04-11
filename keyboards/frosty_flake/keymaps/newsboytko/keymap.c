@@ -1,5 +1,5 @@
 #include "frosty_flake.h"
-#include "keymap_common.h"
+#include "frosty_flake_common_keymap.h"
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 DEFINE_COMMON_LAYERS()
@@ -15,7 +15,7 @@ void action_function(keyrecord_t* record, uint8_t id, uint8_t opt) {
     //TODO: add keyboard-specific actions here
 }
 
-const macro_t *action_get_macro(keyrecord_t* record, uint8_t id, uint8_t opt) {
+const macro_t* action_get_macro(keyrecord_t* record, uint8_t id, uint8_t opt) {
     const macro_t* macro = common_action_get_macro(record, id, opt);
     if (macro)
         return macro;
