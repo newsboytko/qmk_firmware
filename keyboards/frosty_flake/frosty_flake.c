@@ -21,7 +21,9 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
     return process_record_user(keycode, record);
 }
 
-void led_set_kb(uint8_t usb_led) {
+uint8_t current_led_state = 0;
+
+void led_set(uint8_t usb_led) {
     DDRB |= (1<<7);
     DDRC |= (1<<5) | (1<<6);
 
@@ -42,6 +44,34 @@ void led_set_kb(uint8_t usb_led) {
     else
         PORTC |=  (1<<6);
 
+    current_led_state = usb_led;
+}
+
+void led_set_caps_lock(bool enabled)
+{
+    if (enabled)
+        led_set(current_led_state | (1<<USB_LED_CAPS_LOCK));
+    else
+        led_set(current_led_state & ~(1<<USB_LED_CAPS_LOCK));
+}
+
+void led_set_num_lock(bool enabled)
+{
+    if (enabled)
+        led_set(current_led_state | (1<<USB_LED_NUM_LOCK));
+    else
+        led_set(current_led_state & ~(1<<USB_LED_NUM_LOCK));
+}
+
+void led_set_scroll_lock(bool enabled)
+{
+    if (enabled)
+        led_set(current_led_state | (1<<USB_LED_SCROLL_LOCK));
+    else
+        led_set(current_led_state & ~(1<<USB_LED_SCROLL_LOCK));
+}
+
+void led_set_kb(uint8_t usb_led) {
     led_set_user(usb_led);
 }
 
