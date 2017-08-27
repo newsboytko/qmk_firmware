@@ -46,6 +46,6 @@ KEYMAP_ANSI_FOOTSWITCHES( \
   FS1, FS2 \
 )
 
-#include "../../../newsboytko_common/keymap.h"
+#include "../../../newsboytko_common/common_keymap.h"
 
 #endif // __SATAN_KEYMAP_COMMON_H__
