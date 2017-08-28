@@ -66,15 +66,7 @@ enum layer_id
 };
 
 enum function_id {
-    SHIFT_ESC,
-    NEXT_DEFAULT_LAYER,
-    WINDOWS_TASKSWITCH_ENABLE,
-    WINDOWS_TASKSWITCH_SELECT,
-    WINDOWS_TASKSWITCH_CANCEL,
-    MAC_TASKSWITCH_ENABLE,
-    MAC_TASKSWITCH_SELECT,
-    MAC_TASKSWITCH_CANCEL,
-    ONSTAGE_ENABLE,
+    ONSTAGE_ENABLE = common_fn_id_max,
     ONSTAGE_CANCEL,
     ONSTAGE_PLAYSTOP,
     ONSTAGE_STOP,
@@ -105,7 +97,7 @@ enum function_id {
 };
 
 enum macro_id {
-    SD_SUBMIT_YOLO,
+    SD_SUBMIT_YOLO = common_macro_id_max,
     RED_ALERT_EXECUTE,
 };
 
@@ -113,6 +105,8 @@ enum macro_id {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 DEFINE_COMMON_LAYERS(),
+
+#if MIDI_ENABLE && defined(MIDI_ADVANCED)
 
 /* Keymap _ML: MIDI Layer
    * ,------------------------------------------------------------------------.
@@ -141,6 +135,8 @@ DEFINE_COMMON_LAYERS(),
   MI_SUS,  MI_OCTD, MI_OCTU, MI_MODSD, MI_MODSU, XXXXXXX, XXXXXXX, XXXXXXX, MI_TRNSD, MI_TRNSU, MI_TRNS_0,             MI_SUS, \
   _______, _______, _______,                        MI_ALLOFF,                              _______, _______, _______, _______, \
   _______, _______),
+
+#endif
 
 /* Keymap _ML_ONSTAGE: MIDI Layer for performance on stage
    * ,------------------------------------------------------------------------.
@@ -359,6 +355,8 @@ void cancel_red_alert(void)
 #define MODS_ALT_MASK  (MOD_BIT(KC_LALT)|MOD_BIT(KC_RALT))
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
+    dprintf("action_function(...,%d,%d)\n", id, opt);
+
     if (common_action_function(record, id, opt))
         return;
 
@@ -465,9 +463,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
 
                 if (!shift_pressed)
                 {
+#if MIDI_ENABLE
                     uint8_t note = midi_onstage.playing ? midi_onstage.songs[midi_onstage.current_song] : midi_onstage.stop_note;
                     midi_send_noteon(&midi_device, midi_config.channel, note, 127);
                     midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+#endif
                 }
             }
 
@@ -482,9 +482,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
 
                 if (!shift_pressed)
                 {
+#if MIDI_ENABLE
                     uint8_t note = midi_onstage.stop_note;
                     midi_send_noteon(&midi_device, midi_config.channel, note, 127);
                     midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+#endif
                 }
             }
 
@@ -507,9 +509,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                     if (!shift_pressed)
                     {
                         // start the song
+#if MIDI_ENABLE
                         uint8_t note = midi_onstage.songs[midi_onstage.current_song];
                         midi_send_noteon(&midi_device, midi_config.channel, note, 127);
                         midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+#endif
                         midi_onstage_set_playing(true);
                     }
                 }
@@ -578,9 +582,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 if (!shift_pressed)
                 {
                     // start the song
+#if MIDI_ENABLE
                     uint8_t note = midi_onstage.songs[midi_onstage.current_song];
                     midi_send_noteon(&midi_device, midi_config.channel, note, 127);
                     midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+#endif
                     midi_onstage_set_playing(true);
                 }
             }
@@ -731,9 +737,11 @@ void matrix_scan_user()
             midi_onstage_set_song(midi_onstage.delay_start_song);
             midi_onstage_set_playing(true);
             // start the song
+#if MIDI_ENABLE
             uint8_t note = midi_onstage.songs[midi_onstage.current_song];
             midi_send_noteon(&midi_device, midi_config.channel, note, 127);
             midi_send_noteoff(&midi_device, midi_config.channel, note, 0);
+#endif
         }
         else
         {

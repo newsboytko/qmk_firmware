@@ -18,6 +18,7 @@ enum common_layer_id {
     common_layer_gui_windows_task_switch,
     common_layer_gui_mac,
     common_layer_gui_mac_task_switch,
+    common_layer_email,
     common_layer_id_max
 };
 
@@ -30,13 +31,21 @@ enum common_fn_id {
     common_fn_mac_task_switch_enable,
     common_fn_mac_task_switch_select,
     common_fn_mac_task_switch_cancel,
+    common_fn_email_enable,
+    common_fn_email_reply,
+    common_fn_email_forward,
+    common_fn_email_new,
+    common_fn_email_open,
+    common_fn_email_hide_ui,
+    common_fn_email_show_ui,
+    common_fn_email_cancel,
     common_fn_id_max
 };
 
 enum common_macro_id {
     common_macro_kvm1,
     common_macro_kvm2,
-    common_macro__id_max
+    common_macro_id_max
 };
 
 #ifndef DEFINE_COMMON_LAYER_DEFAULT_MAC
@@ -251,7 +260,7 @@ KEYMAP_COMMON(\
   ,-------------------------------------------------------------------------. ,--------------. ,-------------------.
   |Lock|    |    |    |    |    |    |    |    |    |    |KVM1|KVM2| Close  | |    |    |    | |    |    |    |    |
   |-------------------------------------------------------------------------| |--------------| |-------------------|
-  |      |    |    |    |    |    |    |    |    |    |    |Dsk-|Dsk+|TaskSw| |    |    |    | |    |    |    |    |
+  |      |    |    |Mail|    |    |    |    |    |    |    |Dsk-|Dsk+|TaskSw| |    |    |    | |    |    |    |    |
   |-------------------------------------------------------------------------| '--------------' |--------------     |
   |       |    |    |    |    |    |    |    |    |    |SnpL|SnpR| Maximize |                  |    |    |    |    |
   |-------------------------------------------------------------------------|      ,----.      |-------------------|
@@ -269,7 +278,7 @@ KEYMAP_COMMON(\
 [common_layer_gui_windows] = KEYMAP_COMMON(\
     LGUI(KC_L), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     LGUI(KC_L), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, M(common_macro_kvm1), M(common_macro_kvm2), LALT(KC_F4), _______, _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT)), F(common_fn_windows_task_switch_enable), _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, F(common_fn_email_enable), _______, _______, _______, _______, _______, _______, _______, LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT)), F(common_fn_windows_task_switch_enable), _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LGUI(KC_LEFT), LGUI(KC_RGHT), LGUI(KC_UP), _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
@@ -369,6 +378,38 @@ KEYMAP_COMMON(\
     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_TAB, LSFT(KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX, F(common_fn_mac_task_switch_select), XXXXXXX, XXXXXXX, XXXXXXX, \
     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
     XXXXXXX, XXXXXXX, XXXXXXX, F(common_fn_mac_task_switch_select), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    XXXXXXX, XXXXXXX), \
+\
+/* Keymap common_layer_email: GUI Layer for email management
+
+  ,----.    ,-------------------. ,-------------------. ,-------------------. ,--------------.
+  |Exit|    |    |    |    |    | |    |    |    |    | |    |    |    |    | |    |    |    |
+  `----'    `-------------------' `-------------------' `-------------------' `--------------'
+  ,-------------------------------------------------------------------------. ,--------------. ,-------------------.
+  |Exit|    |    |    |    |    |    |    |    |    |    |    |    |        | |    |    |    | |    |    |    |    |
+  |-------------------------------------------------------------------------| |--------------| |-------------------|
+  |      |    |    |    |Rply|    |    |    |    |    |    |    |    |      | |    |    |    | |    |    |    |    |
+  |-------------------------------------------------------------------------| '--------------' |--------------     |
+  |       |Arch|Stky|Del |    |Acco|    |Next|Prev|Expd|Coll|    |          |                  |    |    |    |    |
+  |-------------------------------------------------------------------------|      ,----.      |-------------------|
+  |         |Undo|    |    |    |    |New |    |    |    |    |             |      |Prev|      |    |    |    |    |
+  |-------------------------------------------------------------------------| ,--------------. |--------------     |
+  |    |    |    |                                      |    |    |    |    | |Coll|Next|Expd| |         |    |    |
+  `-------------------------------------------------------------------------' `--------------' `-------------------'
+
+  Foot switches:
+                  ,--------.         ,--------.
+                  |        |         |        |
+                  |        |         |        |
+                  `--------'         `--------'
+*/ \
+[common_layer_email] = KEYMAP_COMMON(\
+    F(common_fn_email_cancel), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    F(common_fn_email_cancel), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    XXXXXXX, F(common_fn_email_hide_ui), F(common_fn_email_show_ui), XXXXXXX, F(common_fn_email_reply), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    XXXXXXX, LCTL(LSFT(KC_1)), LCTL(LSFT(KC_4)), LCTL(KC_D), F(common_fn_email_forward), LCTL(LSFT(KC_3)), XXXXXXX, KC_DOWN, KC_UP, KC_RGHT, KC_LEFT, XXXXXXX, F(common_fn_email_open), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    XXXXXXX, LCTL(KC_Z), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, F(common_fn_email_new), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_UP, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX, \
     XXXXXXX, XXXXXXX)
 
 // Template
@@ -415,7 +456,15 @@ KEYMAP_COMMON(\
   [common_fn_windows_task_switch_cancel] = ACTION_FUNCTION(common_fn_windows_task_switch_cancel), \
   [common_fn_mac_task_switch_enable] = ACTION_FUNCTION(common_fn_mac_task_switch_enable), \
   [common_fn_mac_task_switch_select] = ACTION_FUNCTION(common_fn_mac_task_switch_select), \
-  [common_fn_mac_task_switch_cancel] = ACTION_FUNCTION(common_fn_mac_task_switch_cancel)
+  [common_fn_mac_task_switch_cancel] = ACTION_FUNCTION(common_fn_mac_task_switch_cancel), \
+  [common_fn_email_enable] = ACTION_FUNCTION(common_fn_email_enable), \
+  [common_fn_email_reply] = ACTION_FUNCTION(common_fn_email_reply), \
+  [common_fn_email_forward] = ACTION_FUNCTION(common_fn_email_forward), \
+  [common_fn_email_new] = ACTION_FUNCTION(common_fn_email_new), \
+  [common_fn_email_open] = ACTION_FUNCTION(common_fn_email_open), \
+  [common_fn_email_hide_ui] = ACTION_FUNCTION(common_fn_email_hide_ui), \
+  [common_fn_email_show_ui] = ACTION_FUNCTION(common_fn_email_show_ui), \
+  [common_fn_email_cancel] = ACTION_FUNCTION(common_fn_email_cancel)
 
 // Common modifier masks
 #define MODS_SHIFT_MASK  (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
@@ -428,6 +477,13 @@ void persistent_default_layer_set(uint16_t default_layer)
 {
     eeconfig_update_default_layer(default_layer);
     default_layer_set(default_layer);
+}
+
+void common_action_email_cancel(void)
+{
+    dprintf("Email layer off. layer state=0x%08X\n", layer_state);
+    layer_off(common_layer_email);
+    layer_off(common_layer_gui_windows);
 }
 
 bool common_action_function(keyrecord_t* record, uint8_t id, uint8_t opt) {
@@ -536,6 +592,152 @@ bool common_action_function(keyrecord_t* record, uint8_t id, uint8_t opt) {
                 unregister_code(KC_LGUI);
                 layer_off(common_layer_gui_mac_task_switch);
                 layer_off(common_layer_gui_mac);
+            }
+
+            return true;
+        }
+        case common_fn_email_enable:
+        {
+            if (record->event.pressed)
+            {
+                dprintf("Email layer on. layer state=0x%08X\n", layer_state);
+
+                // Switch to outbox, then inbox (Ctrl+Shift+O, Ctrl+Shift+I)
+                register_code(KC_LCTL);
+                register_code(KC_LSHIFT);
+                register_code(KC_O);
+                unregister_code(KC_O);
+                register_code(KC_I);
+                unregister_code(KC_I);
+                unregister_code(KC_LSHIFT);
+                unregister_code(KC_LCTL);
+
+                // check for new messages (Ctrl+M)
+                register_code(KC_LCTL);
+                register_code(KC_M);
+                unregister_code(KC_M);
+                unregister_code(KC_LCTL);
+
+                layer_on(common_layer_email);
+            }
+
+            return true;
+        }
+        case common_fn_email_reply:
+        {
+            if (record->event.pressed)
+            {
+                // Reply and delete (Ctrl+Shift+2)
+                register_code(KC_LCTL);
+                register_code(KC_LSHIFT);
+                register_code(KC_2);
+                unregister_code(KC_2);
+                unregister_code(KC_LSHIFT);
+                unregister_code(KC_LCTL);
+
+                common_action_email_cancel();
+            }
+
+            return true;
+        }
+        case common_fn_email_forward:
+        {
+            if (record->event.pressed)
+            {
+                // Forward and delete (Ctrl+Shift+5)
+                register_code(KC_LCTL);
+                register_code(KC_LSHIFT);
+                register_code(KC_5);
+                unregister_code(KC_5);
+                unregister_code(KC_LSHIFT);
+                unregister_code(KC_LCTL);
+
+                common_action_email_cancel();
+            }
+
+            return true;
+        }
+        case common_fn_email_new:
+        {
+            if (record->event.pressed)
+            {
+                // Create new email (Ctrl+Shift+M)
+                register_code(KC_LCTL);
+                register_code(KC_LSHIFT);
+                register_code(KC_M);
+                unregister_code(KC_M);
+                unregister_code(KC_LSHIFT);
+                unregister_code(KC_LCTL);
+
+                common_action_email_cancel();
+            }
+
+            return true;
+        }
+        case common_fn_email_open:
+        {
+            if (record->event.pressed)
+            {
+                // Open current email (Ctrl+O)
+                register_code(KC_LCTL);
+                register_code(KC_O);
+                unregister_code(KC_O);
+                unregister_code(KC_LCTL);
+
+                common_action_email_cancel();
+            }
+
+            return true;
+        }
+        case common_fn_email_hide_ui:
+        {
+            if (record->event.pressed)
+            {
+                // Assumes folder pane and ribbon are fully visible
+
+                // Toggle ribbon (Ctrl+F1)
+                register_code(KC_LCTL);
+                register_code(KC_F1);
+                unregister_code(KC_F1);
+                unregister_code(KC_LCTL);
+
+                // Toggle folder pane 2x (Alt+F1)
+                register_code(KC_LALT);
+                register_code(KC_F1);
+                unregister_code(KC_F1);
+                register_code(KC_F1);
+                unregister_code(KC_F1);
+                unregister_code(KC_LALT);
+            }
+
+            return true;
+        }
+        case common_fn_email_show_ui:
+        {
+            if (record->event.pressed)
+            {
+                // Assumes folder pane and ribbon are hidden
+
+                // Toggle ribbon (Ctrl+F1)
+                register_code(KC_LCTL);
+                register_code(KC_F1);
+                unregister_code(KC_F1);
+                unregister_code(KC_LCTL);
+
+                // Toggle folder pane 1x (Alt+F1)
+                register_code(KC_LALT);
+                register_code(KC_F1);
+                unregister_code(KC_F1);
+                unregister_code(KC_LALT);
+            }
+
+            return true;
+        }
+        case common_fn_email_cancel:
+        {
+            if (record->event.pressed)
+            {
+                common_action_email_cancel();
             }
 
             return true;
