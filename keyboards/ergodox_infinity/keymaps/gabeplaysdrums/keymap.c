@@ -217,3 +217,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           return true;
     }
 }
+
+void matrix_scan_user(void) {
+
+    ergodox_board_led_off();
+    ergodox_right_led_1_off();
+    ergodox_right_led_2_off();
+    ergodox_right_led_3_off();
+
+    if (layer_state & (SYMB << 1))
+    {
+        ergodox_right_led_1_on();
+    }
+
+    if (layer_state & (FUNC << 1))
+    {
+        ergodox_right_led_2_on();
+    }
+
+};
