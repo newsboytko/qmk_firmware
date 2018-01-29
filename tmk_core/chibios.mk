@@ -221,6 +221,8 @@ qmk: $(BUILD_DIR)/$(TARGET).bin
 	printf "@ $(TARGET).json\n@=info.json\n" | zipnote -w $(TARGET).qmk
 
 dfu-util: $(BUILD_DIR)/$(TARGET).bin cpfirmware sizeafter
+	$(SECHO) Running dfu-util:
+	$(SECHO) $(DFU_UTIL) $(DFU_ARGS) -D $(BUILD_DIR)/$(TARGET).bin
 	$(DFU_UTIL) $(DFU_ARGS) -D $(BUILD_DIR)/$(TARGET).bin
 
 bin: $(BUILD_DIR)/$(TARGET).bin sizeafter
