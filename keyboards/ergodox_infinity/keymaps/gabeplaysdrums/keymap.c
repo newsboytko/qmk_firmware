@@ -1,4 +1,8 @@
 #include QMK_KEYBOARD_H
+#include "eeprom.h"
+#include "eeconfig.h"
+
+#define EECONFIG_GABEPLAYSDRUMS                         (uint32_t *)15
 
 #define XXXXX KC_NO
 #define _____ KC_TRNS
@@ -13,8 +17,35 @@ enum custom_keycodes {
     MAKE = SAFE_RANGE,
     MAKE_RIGHT,
     CPP_DEREF,
+    OS_MOD_WORD,
+    OS_MOD_OPT,
+    OS_TOGGLE,
     MY_SAFE_RANGE,
 };
+
+enum os_type {
+    OS_WINDOWS,
+    OS_MAC,
+    OS_MAX
+};
+
+typedef union {
+  uint32_t raw;
+  struct {
+    uint8_t os      :2;
+  };
+} my_config_t;
+
+static my_config_t my_config = {
+    .os = OS_MAC,
+};
+
+uint32_t eeconfig_read_my_config(void) {
+  return eeprom_read_dword(EECONFIG_GABEPLAYSDRUMS);
+}
+void eeconfig_update_my_config(uint32_t val) {
+  eeprom_update_dword(EECONFIG_GABEPLAYSDRUMS, val);
+}
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -29,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |   /  | RShift |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
- *   |      |      |      |      |      |                                       |      |      |      | SYMB | FUNC |
+ *   |      |      |      |      |      |                                       | GUI  |      |      | SYMB | FUNC |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,-------------.
  *                                        |      |      |       |      |      |
@@ -55,7 +86,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 XXXXX, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
                                 KC_H, KC_J, KC_K, KC_L, KC_SCLN, KC_QUOT,
                                 XXXXX, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
-                                XXXXX, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
+                                KC_RGUI, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
         XXXXX, XXXXX,
         XXXXX,
         XXXXX, KC_ENT, KC_SPC
@@ -122,19 +153,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 ,------|------|------|       |------+------+------.
  *                                 |      |      |      |       |      |      |      |
  *                                 |      |      |------|       |------|      |      |
- *                                 |      |      |      |       |      |      |      |
+ *                                 |      |      | OS++ |       |      |      |      |
  *                                 `--------------------'       `--------------------'
  */
 [FUNC] = KEYMAP(
         // left hand
         _____, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, _____,
         _____, _____, _____, _____, _____, _____, _____,
-        _____, _____, KC_LCTL, KC_LSFT, KC_LALT, _____,
+        _____, _____, OS_MOD_OPT, KC_LSFT, OS_MOD_WORD, _____,
         _____, _____, _____, _____, _____, _____, _____,
         _____, _____, _____, _____, _____,
                                                         MAKE, RESET,
                                                         _____,
-                                                        _____, _____, _____,
+                                                        _____, _____, OS_TOGGLE,
 
         // right hand
                                 _____, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11,
@@ -213,6 +244,53 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 SEND_STRING("->");
             }
             return false;
+        case OS_MOD_WORD:
+        {
+            uint8_t code;
+
+            if (my_config.os == OS_WINDOWS) {
+                code = KC_LCTL;
+            }
+            else { // my_config.os == OS_MAC
+                code = KC_LALT;
+            }
+
+            if (record->event.pressed) {
+                register_code(code);
+            }
+            else {
+                unregister_code(code);
+            }
+
+            return false;
+        }
+        case OS_MOD_OPT:
+        {
+            uint8_t code;
+
+            if (my_config.os == OS_WINDOWS) {
+                code = KC_LALT;
+            }
+            else { // my_config.os == OS_MAC
+                code = KC_LCTL;
+            }
+
+            if (record->event.pressed) {
+                register_code(code);
+            }
+            else {
+                unregister_code(code);
+            }
+
+            return false;
+        }
+        case OS_TOGGLE:
+            if (record->event.pressed) {
+                ++my_config.os;
+                if (my_config.os >= OS_MAX) my_config.os = 0;
+                eeconfig_update_my_config(my_config.raw);
+            }
+            return false;
         default:
           return true;
     }
@@ -235,4 +313,8 @@ void matrix_scan_user(void) {
         ergodox_right_led_2_on();
     }
 
-};
+}
+
+void matrix_init_user(void) {
+    my_config.raw = eeconfig_read_my_config();
+}
