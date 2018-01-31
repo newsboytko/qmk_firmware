@@ -18,7 +18,10 @@ enum custom_keycodes {
     MAKE_RIGHT,
     CPP_DEREF,
     OS_TOGGLE,
+    OS_MOD_META,
     OS_MOD_WORD,
+    OS_MOD_GUI_OR_ALT,
+    OS_MOD_ALT_OR_GUI,
     OS_SAVE,
     OS_QUIT,
     OS_UNDO,
@@ -79,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------| PASTE|           |      |------+------+------+------+------+--------|
  * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |   /  | RShift |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
- *   |      |      |      |      |      |                                       | GUI  |      |      | SYMB | FUNC |
+ *   | Ctrl |#/Alt |Alt/# |      |      |                                       | META |      |      | SYMB | FUNC |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,-------------.
  *                                        |      |      |       |      |      |
@@ -95,7 +98,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, OS_COPY,
         MO(SYMB), KC_A, KC_S, KC_D, KC_F, KC_G,
         KC_LSFT, KC_Z, KC_X, KC_C, KC_V, KC_B, OS_PASTE,
-        KC_LCTL, KC_LGUI, KC_LALT, XXXXX, XXXXX,
+        KC_LCTL, OS_MOD_GUI_OR_ALT, OS_MOD_ALT_OR_GUI, XXXXX, XXXXX,
                                                         XXXXX, XXXXX,
                                                         XXXXX,
                                                         KC_BSPC, TT(FUNC), OS_SWITCH_TASK,
@@ -105,7 +108,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 XXXXX, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
                                 KC_H, OS_NEXT_TASK, OS_PREV_TASK, KC_L, KC_SCLN, KC_QUOT,
                                 XXXXX, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
-                                KC_RGUI, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
+                                OS_MOD_META, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
         XXXXX, XXXXX,
         XXXXX,
         OS_LAUNCH, KC_ENT, KC_SPC
@@ -170,7 +173,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        ,-------------.       ,-------------.
  *                                        | MAKE |RESET |       | RESET| MAKE |
  *                                 ,------|------|------|       |------+------+------.
- *                                 |      |      |      |       |      |      |      |
+ *                                 | META |      |      |       |      |      |      |
  *                                 |      |      |------|       |------|      |      |
  *                                 |      |      | OS++ |       |      |      |      |
  *                                 `--------------------'       `--------------------'
@@ -270,26 +273,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 eeconfig_update_my_config(my_config.raw);
             }
             return false;
-        case OS_MOD_WORD:
-        {
-            uint8_t code;
-
-            if (my_config.os == OS_WINDOWS) {
-                code = KC_LCTL;
-            }
-            else { // my_config.os == OS_MAC
-                code = KC_LALT;
-            }
-
-            if (record->event.pressed) {
-                register_code(code);
-            }
-            else {
-                unregister_code(code);
-            }
-
-            return false;
-        }
         case OS_QUIT:
         {
             if (record->event.pressed) {
@@ -415,6 +398,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 #undef DEFINE_BASIC_OS_COMMAND
 
+#define DEFINE_BASIC_OS_MOD(kc, windows, mac) \
+        case kc: \
+        { \
+            uint8_t code; \
+            if (my_config.os == OS_WINDOWS) { \
+                code = windows; \
+            } \
+            else { /* my_config.os == OS_MAC */ \
+                code = mac; \
+            } \
+            if (record->event.pressed) { \
+                register_code(code); \
+            } \
+            else { \
+                unregister_code(code); \
+            } \
+            return false; \
+        }
+
+        DEFINE_BASIC_OS_MOD(OS_MOD_META, KC_LCTL, KC_LGUI)
+        DEFINE_BASIC_OS_MOD(OS_MOD_WORD, KC_LCTL, KC_LALT)
+        DEFINE_BASIC_OS_MOD(OS_MOD_GUI_OR_ALT, KC_LGUI, KC_LALT)
+        DEFINE_BASIC_OS_MOD(OS_MOD_ALT_OR_GUI, KC_LALT, KC_LGUI)
+
+#undef DEFINE_BASIC_OS_MOD
+
         default:
           return true;
     }
@@ -425,8 +434,7 @@ void matrix_scan_user(void) {
     ergodox_board_led_off();
     ergodox_right_led_1_off();
     ergodox_right_led_2_off();
-    ergodox_right_led_3_off();
-
+    ergodox_right_led_3_ofMETA 
     if (layer_state & (SYMB << 1))
     {
         ergodox_right_led_1_on();
