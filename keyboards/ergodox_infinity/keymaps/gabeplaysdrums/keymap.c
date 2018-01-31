@@ -34,6 +34,10 @@ enum custom_keycodes {
     OS_SWITCH_TASK,
     OS_NEXT_TASK,
     OS_PREV_TASK,
+    OS_NEXT_DESKTOP,
+    OS_PREV_DESKTOP,
+    OS_NEXT_COMPUTER,
+    OS_PREV_COMPUTER,
     MY_SAFE_RANGE,
 };
 
@@ -76,11 +80,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * | Esc    |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  |   -    |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * | Tab    |   Q  |   W  |   E  |   R  |   T  | COPY |           |      |   Y  |   U  |   I  |   O  |   P  |   \    |
- * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * | Tab    |   Q  |   W  |   E  |   R  |   T  | COPY |           |Desk  |   Y  |   U  |   I  |   O  |   P  |   \    |
+ * |--------+------+------+------+------+------|      |           |top-  |------+------+------+------+------+--------|
  * | SYMB   |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  |J/Tsk+|K/Tsk-|   L  |   ;  |   '    |
- * |--------+------+------+------+------+------| PASTE|           |      |------+------+------+------+------+--------|
- * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |   /  | RShift |
+ * |--------+------+------+------+------+------| PASTE|           |Desk  |------+------+------+------+------+--------|
+ * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |top+  |   N  |   M  |   ,  |   .  |   /  | RShift |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   | Ctrl |#/Alt |Alt/# |      |      |                                       | META |      |      | SYMB | FUNC |
  *   `----------------------------------'                                       `----------------------------------'
@@ -105,9 +109,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
         // right hand
                                 XXXXX, KC_6, KC_7, KC_8, KC_9, KC_0, KC_MINS,
-                                XXXXX, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
+                                OS_PREV_DESKTOP, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
                                 KC_H, OS_NEXT_TASK, OS_PREV_TASK, KC_L, KC_SCLN, KC_QUOT,
-                                XXXXX, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
+                                OS_NEXT_DESKTOP, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
                                 OS_MOD_META, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
         XXXXX, XXXXX,
         XXXXX,
@@ -162,11 +166,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |        |  F1  |  F2  |  F3  |  F4  |  F5  |      |           |      |  F6  |  F7  |  F8  |  F9  | F10  |  F11   |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |        | QUIT |      |      | RUN  |      |      |           |      | PgUp | Home |  Up  | End  |      |  F12   |
- * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        | QUIT |      |      | RUN  |      |      |           |Compu | PgUp | Home |  Up  | End  |      |  F12   |
+ * |--------+------+------+------+------+------|      |           |ter-  |------+------+------+------+------+--------|
  * |        |SELALL| SAVE |Shift | WORD |      |------|           |------| PgDn | Left | Down | Right|      |        |
- * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
- * |        | UNDO | CUT  | COPY |PASTE |      |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|      |           |Compu |------+------+------+------+------+--------|
+ * |        | UNDO | CUT  | COPY |PASTE |      |      |           |ter+  |      |      |      |      |      |        |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   |      |      |      |      |      |                                       |      |      |      |      |      |
  *   `----------------------------------'                                       `----------------------------------'
@@ -191,9 +195,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
         // right hand
                                 _____, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11,
-                                _____, KC_PGUP, KC_HOME, KC_UP, KC_END, _____, KC_F12,
+                                OS_PREV_COMPUTER, KC_PGUP, KC_HOME, KC_UP, KC_END, _____, KC_F12,
                                 KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _____, _____,
-                                _____, _____, _____, _____, _____, _____, _____,
+                                OS_NEXT_COMPUTER, _____, _____, _____, _____, _____, _____,
                                 _____, _____, _____, _____, _____,
         RESET, MAKE_RIGHT,
         _____,
@@ -374,6 +378,52 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
             return false;
         }
+        case OS_NEXT_DESKTOP:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LGUI) SS_TAP(X_RIGHT) SS_UP(X_LGUI) SS_UP(X_LCTRL));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_RIGHT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_PREV_DESKTOP:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LGUI) SS_TAP(X_LEFT) SS_UP(X_LGUI) SS_UP(X_LCTRL));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_LEFT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_NEXT_COMPUTER:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_TAP(X_LCTRL) SS_TAP(X_LCTRL) "2" SS_TAP(X_ENTER));
+                }
+                else { // my_config.os == OS_MAC
+                }
+            }
+            return false;
+        }
+        case OS_PREV_COMPUTER:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_TAP(X_LCTRL) SS_TAP(X_LCTRL) "1" SS_TAP(X_ENTER));
+                }
+                else { // my_config.os == OS_MAC
+                }
+            }
+            return false;
+        }
 
 #define DEFINE_BASIC_OS_COMMAND(kc, shortcut) \
         case kc: \
@@ -434,7 +484,8 @@ void matrix_scan_user(void) {
     ergodox_board_led_off();
     ergodox_right_led_1_off();
     ergodox_right_led_2_off();
-    ergodox_right_led_3_ofMETA 
+    ergodox_right_led_3_off();
+
     if (layer_state & (SYMB << 1))
     {
         ergodox_right_led_1_on();
