@@ -22,13 +22,14 @@ enum custom_keycodes {
     OS_MOD_WORD,
     OS_MOD_GUI_OR_ALT,
     OS_MOD_ALT_OR_GUI,
+    OS_SELECT_LINE,
     OS_SAVE,
     OS_QUIT,
     OS_UNDO,
     OS_CUT,
     OS_COPY,
     OS_PASTE,
-    OS_SELECTALL,
+    OS_SELECT_ALL,
     OS_LAUNCH,
     OS_RUN,
     OS_SWITCH_TASK,
@@ -177,8 +178,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        ,-------------.       ,-------------.
  *                                        | MAKE |RESET |       | RESET| MAKE |
  *                                 ,------|------|------|       |------+------+------.
- *                                 | META |      |      |       |      |      |      |
- *                                 |      |      |------|       |------|      |      |
+ *                                 | META |      |      |       |      |      |Select|
+ *                                 |      |      |------|       |------|      | Line |
  *                                 |      |      | OS++ |       |      |      |      |
  *                                 `--------------------'       `--------------------'
  */
@@ -186,7 +187,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // left hand
         _____, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, _____,
         _____, OS_QUIT, _____, _____, OS_RUN, _____, _____,
-        _____, OS_SELECTALL, OS_SAVE, KC_LSFT, OS_MOD_WORD, _____,
+        _____, OS_SELECT_ALL, OS_SAVE, KC_LSFT, OS_MOD_WORD, _____,
         _____, OS_UNDO, OS_CUT, OS_COPY, OS_PASTE, _____, _____,
         _____, _____, _____, _____, _____,
                                                         MAKE, RESET,
@@ -201,7 +202,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 _____, _____, _____, _____, _____,
         RESET, MAKE_RIGHT,
         _____,
-        _____, _____, _____
+        _____, _____, OS_SELECT_LINE
     ),
 
 };
@@ -277,6 +278,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 eeconfig_update_my_config(my_config.raw);
             }
             return false;
+        case OS_SELECT_LINE:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_TAP(X_HOME) SS_DOWN(X_LSHIFT) SS_TAP(X_END) SS_UP(X_LSHIFT));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_LEFT) SS_UP(X_LGUI) SS_DOWN(X_LSHIFT) SS_DOWN(X_LGUI) SS_TAP(X_RIGHT) SS_UP(X_LGUI) SS_UP(X_LSHIFT));
+                }
+            }
+
+            return false;
+        }
         case OS_QUIT:
         {
             if (record->event.pressed) {
@@ -439,7 +453,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false; \
         }
 
-        DEFINE_BASIC_OS_COMMAND(OS_SELECTALL, "a")
+        DEFINE_BASIC_OS_COMMAND(OS_SELECT_ALL, "a")
         DEFINE_BASIC_OS_COMMAND(OS_SAVE, "s")
         DEFINE_BASIC_OS_COMMAND(OS_UNDO, "z")
         DEFINE_BASIC_OS_COMMAND(OS_CUT, "x")
