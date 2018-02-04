@@ -11,6 +11,7 @@ enum layers {
     BASE,
     SYMB,
     FUNC,
+    NUMPAD,
 };
 
 enum custom_keycodes {
@@ -93,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------| PASTE|           |Desk  |------+------+------+------+------+--------|
  * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |top+  |   N  |   M  |   ,  |   .  |   /  | RShift |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
- *   | Ctrl |#/Alt |Alt/# |      |      |                                       | META |      |      | SYMB | FUNC |
+ *   | Ctrl |#/Alt |Alt/# |      |NUMPAD|                                       | META |      |NUMPAD| SYMB | FUNC |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,-------------.
  *                                        |      |      |       |      |      |
@@ -109,7 +110,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, OS_COPY,
         MO(SYMB), KC_A, KC_S, KC_D, KC_F, KC_G,
         KC_LSFT, KC_Z, KC_X, KC_C, KC_V, KC_B, OS_PASTE,
-        KC_LCTL, OS_MOD_GUI_OR_ALT, OS_MOD_ALT_OR_GUI, XXXXX, XXXXX,
+        KC_LCTL, OS_MOD_GUI_OR_ALT, OS_MOD_ALT_OR_GUI, XXXXX, TT(NUMPAD),
                                                         XXXXX, XXXXX,
                                                         XXXXX,
                                                         KC_BSPC, TT(FUNC), OS_SWITCH_TASK,
@@ -119,7 +120,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 OS_PREV_DESKTOP, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
                                 KC_H, OS_NEXT_TASK, OS_PREV_TASK, KC_L, KC_SCLN, KC_QUOT,
                                 OS_NEXT_DESKTOP, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
-                                OS_MOD_META, XXXXX, XXXXX, TT(SYMB), TT(FUNC),
+                                OS_MOD_META, XXXXX, TT(NUMPAD), TT(SYMB), TT(FUNC),
         XXXXX, XXXXX,
         XXXXX,
         OS_LAUNCH, KC_ENT, KC_SPC
@@ -209,6 +210,49 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         RESET, MAKE_RIGHT,
         _____,
         _____, _____, _____
+    ),
+
+/* Numpad Layer
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |      |      |      |      |      |      |           |      |      |  P7  |  P8  |  P9  |  /   |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |  P4  |  P5  |  P6  |  *   |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |------|           |------|      |  P1  |  P2  |  P3  |  +   |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |  P0  |  P0  |  P.  |  -   |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+------.
+ *                                 |      |      |      |       |      | Pad  |      |
+ *                                 |      |      |------|       |------| Enter|      |
+ *                                 |      |      |      |       |      |      |      |
+ *                                 `--------------------'       `--------------------'
+ */
+[NUMPAD] = KEYMAP(
+        // left hand
+        _____, _____, _____, _____, _____, _____, _____,
+        _____, _____, _____, _____, _____, _____, _____,
+        _____, _____, _____, _____, _____, _____,
+        _____, _____, _____, _____, _____, _____, _____,
+        _____, _____, _____, _____, _____,
+                                                        _____, _____,
+                                                        _____,
+                                                        _____, _____, _____,
+
+        // right hand
+                                _____, _____, KC_P7, KC_P8, KC_P9, KC_PSLS, _____,
+                                _____, _____, KC_P4, KC_P5, KC_P6, KC_PAST, _____,
+                                _____, KC_P1, KC_P2, KC_P3, KC_PPLS, _____,
+                                _____, _____, KC_P0, KC_P0, KC_PDOT, KC_PMNS, _____,
+                                _____, _____, _____, _____, _____,
+        _____, _____,
+        _____,
+        _____, KC_PENT, _____
     ),
 
 };
@@ -587,6 +631,14 @@ void matrix_scan_user(void) {
     {
         ergodox_right_led_2_on();
     }
+
+    // LED #3 doesn't seem to work correctly
+#if 0
+    if (layer_state & (NUMPAD << 1))
+    {
+        ergodox_right_led_3_on();
+    }
+#endif
 
 }
 
