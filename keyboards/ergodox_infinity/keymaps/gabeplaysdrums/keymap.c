@@ -39,6 +39,12 @@ enum custom_keycodes {
     OS_PREV_DESKTOP,
     OS_NEXT_COMPUTER,
     OS_PREV_COMPUTER,
+    OS_SNAP_LEFT,
+    OS_SNAP_RIGHT,
+    OS_MOVE_NEXT_MONITOR,
+    OS_MOVE_PREV_MONITOR,
+    OS_MAXIMIZE,
+    OS_MINIMIZE,
     MY_SAFE_RANGE,
 };
 
@@ -171,9 +177,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|      |           |ter-  |------+------+------+------+------+--------|
  * |        |SELALL| SAVE |Shift | WORD |      |------|           |------| PgDn | Left | Down | Right|      |        |
  * |--------+------+------+------+------+------|      |           |Compu |------+------+------+------+------+--------|
- * |        | UNDO | CUT  | COPY |PASTE |      |      |           |ter+  |      |      |      |      |      |        |
+ * |        | UNDO | CUT  | COPY |PASTE |      |      |           |ter+  |      | Mon- | Max  | Mon+ |      |        |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
- *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   |      |      |      |      |      |                                       |Snap L| Min  |Snap R|      |      |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,-------------.
  *                                        | MAKE |RESET |       | RESET| MAKE |
@@ -198,8 +204,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 _____, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11,
                                 OS_PREV_COMPUTER, KC_PGUP, KC_HOME, KC_UP, KC_END, _____, KC_F12,
                                 KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _____, _____,
-                                OS_NEXT_COMPUTER, _____, _____, _____, _____, _____, _____,
-                                _____, _____, _____, _____, _____,
+                                OS_NEXT_COMPUTER, _____, OS_MOVE_PREV_MONITOR, OS_MAXIMIZE, OS_MOVE_NEXT_MONITOR, _____, _____,
+                                OS_SNAP_LEFT, OS_MINIMIZE, OS_SNAP_RIGHT, _____, _____,
         RESET, MAKE_RIGHT,
         _____,
         _____, _____, OS_SELECT_LINE
@@ -434,6 +440,78 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     SEND_STRING(SS_TAP(X_LCTRL) SS_TAP(X_LCTRL) "1" SS_TAP(X_ENTER));
                 }
                 else { // my_config.os == OS_MAC
+                }
+            }
+            return false;
+        }
+        case OS_SNAP_LEFT:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_LEFT) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LALT) SS_DOWN(X_LGUI) SS_TAP(X_LEFT) SS_UP(X_LGUI) SS_UP(X_LALT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_SNAP_RIGHT:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_RIGHT) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LALT) SS_DOWN(X_LGUI) SS_TAP(X_RIGHT) SS_UP(X_LGUI) SS_UP(X_LALT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_MAXIMIZE:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_UP) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LALT) SS_DOWN(X_LGUI) "m" SS_UP(X_LGUI) SS_UP(X_LALT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_MINIMIZE:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_DOWN) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_LGUI("h"));
+                }
+            }
+            return false;
+        }
+        case OS_MOVE_NEXT_MONITOR:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_DOWN(X_LSHIFT) SS_TAP(X_RIGHT) SS_UP(X_LSHIFT) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LALT) SS_DOWN(X_LGUI) "n" SS_UP(X_LGUI) SS_UP(X_LALT) SS_UP(X_LCTRL));
+                }
+            }
+            return false;
+        }
+        case OS_MOVE_PREV_MONITOR:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                    SEND_STRING(SS_DOWN(X_LGUI) SS_DOWN(X_LSHIFT) SS_TAP(X_LEFT) SS_UP(X_LSHIFT) SS_UP(X_LGUI));
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_DOWN(X_LALT) SS_DOWN(X_LGUI) "p" SS_UP(X_LGUI) SS_UP(X_LALT) SS_UP(X_LCTRL));
                 }
             }
             return false;
