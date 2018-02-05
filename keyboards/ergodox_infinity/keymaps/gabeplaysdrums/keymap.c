@@ -1,6 +1,7 @@
 #include QMK_KEYBOARD_H
 #include "eeprom.h"
 #include "eeconfig.h"
+#include "wait.h"
 
 #define EECONFIG_GABEPLAYSDRUMS                         (uint32_t *)15
 
@@ -11,7 +12,10 @@ enum layers {
     BASE,
     SYMB,
     FUNC,
-    NUMPAD,
+    MAGIC_LAYER_MIN,
+    NUMPAD = MAGIC_LAYER_MIN,
+    PROTOOLS,
+    MAGIC_LAYER_MAX
 };
 
 enum custom_keycodes {
@@ -46,6 +50,9 @@ enum custom_keycodes {
     OS_MOVE_PREV_MONITOR,
     OS_MAXIMIZE,
     OS_MINIMIZE,
+    MAGIC,
+    MAGIC_TOGGLE,
+    PT_SMART_TOOL,
     MY_SAFE_RANGE,
 };
 
@@ -59,11 +66,13 @@ typedef union {
   uint32_t raw;
   struct {
     uint8_t os      :2;
+    uint8_t magic_layer_index:4;
   };
 } my_config_t;
 
 static my_config_t my_config = {
     .os = OS_MAC,
+    .magic_layer_index = 0,
 };
 
 uint32_t eeconfig_read_my_config(void) {
@@ -75,10 +84,12 @@ void eeconfig_update_my_config(uint32_t val) {
 
 typedef struct {
     bool task_switcher_active;
+    uint16_t magic_timer;
 } my_state_t;
 
 static my_state_t my_state = {
     .task_switcher_active = false,
+    .magic_timer = 0,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -94,7 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------| PASTE|           |Desk  |------+------+------+------+------+--------|
  * | LShift |   Z  |   X  |   C  |   V  |   B  |      |           |top+  |   N  |   M  |   ,  |   .  |   /  | RShift |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
- *   | Ctrl |#/Alt |Alt/# |      |NUMPAD|                                       | META |      |NUMPAD| SYMB | FUNC |
+ *   | Ctrl |#/Alt |Alt/# |MAGIC+|MAGIC |                                       | META |MAGIC+|MAGIC | SYMB | FUNC |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,-------------.
  *                                        |      |      |       |      |      |
@@ -110,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, OS_COPY,
         MO(SYMB), KC_A, KC_S, KC_D, KC_F, KC_G,
         KC_LSFT, KC_Z, KC_X, KC_C, KC_V, KC_B, OS_PASTE,
-        KC_LCTL, OS_MOD_GUI_OR_ALT, OS_MOD_ALT_OR_GUI, XXXXX, TT(NUMPAD),
+        KC_LCTL, OS_MOD_GUI_OR_ALT, OS_MOD_ALT_OR_GUI, MAGIC_TOGGLE, MAGIC,
                                                         XXXXX, XXXXX,
                                                         XXXXX,
                                                         KC_BSPC, TT(FUNC), OS_SWITCH_TASK,
@@ -120,7 +131,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 OS_PREV_DESKTOP, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS,
                                 KC_H, OS_NEXT_TASK, OS_PREV_TASK, KC_L, KC_SCLN, KC_QUOT,
                                 OS_NEXT_DESKTOP, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
-                                OS_MOD_META, XXXXX, TT(NUMPAD), TT(SYMB), TT(FUNC),
+                                OS_MOD_META, MAGIC_TOGGLE, MAGIC, TT(SYMB), TT(FUNC),
         XXXXX, XXXXX,
         XXXXX,
         OS_LAUNCH, KC_ENT, KC_SPC
@@ -185,7 +196,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        ,-------------.       ,-------------.
  *                                        | MAKE |RESET |       | RESET| MAKE |
  *                                 ,------|------|------|       |------+------+------.
- *                                 | META |      |      |       |      |      |      |
+ *                                 |      |      |      |       |      |      |      |
  *                                 |      |      |------|       |------|      |      |
  *                                 |      |      | OS++ |       |      |      |      |
  *                                 `--------------------'       `--------------------'
@@ -255,6 +266,49 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _____, KC_PENT, _____
     ),
 
+/* Pro Tools Layer
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |Shuffl| Slip | Spot | Grid |      |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |  Tab   |      |      |      | Loop | Trim |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |Mix/Edit|      |Smart |      |      |      |------|           |------|      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        | Zoom | Cut  | Copy |Paste |Break |      |           |      |      |      |      |      |      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+------.
+ *                                 | Play |      |      |       |      |      |      |
+ *                                 |      |      |------|       |------|      |      |
+ *                                 |      |      | Rec  |       |      |      |      |
+ *                                 `--------------------'       `--------------------'
+ */
+[PROTOOLS] = KEYMAP(
+        // left hand
+        KC_ESC, KC_F1, KC_F2, KC_F3, KC_F4, XXXXX, XXXXX,
+        KC_TAB, XXXXX, XXXXX, XXXXX, LGUI(LSFT(KC_L)), KC_F6, XXXXX,
+        LGUI(KC_EQL), XXXXX, PT_SMART_TOOL, XXXXX, XXXXX, XXXXX,
+        KC_LSFT, KC_F5, LGUI(KC_X), LGUI(KC_C), LGUI(KC_V), LGUI(KC_E), XXXXX,
+        _____, _____, _____, _____, _____,
+                                                        XXXXX, XXXXX,
+                                                        XXXXX,
+                                                        KC_SPC, XXXXX, LGUI(KC_SPC),
+
+        // right hand
+                                XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,
+                                XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,
+                                XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,
+                                XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, KC_RSFT,
+                                _____, _____, _____, _____, _____,
+        XXXXX, XXXXX,
+        XXXXX,
+        XXXXX, XXXXX, KC_SPC
+    ),
+
 };
 
 #if 0
@@ -304,10 +358,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #endif
 
+void matrix_scan_magic(void);
+bool process_record_magic(uint16_t keycode, keyrecord_t *record);
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_record_magic(keycode, record)) return false;
+
     switch (keycode) {
         case MAKE:
         case MAKE_RIGHT:
+        {
             if (record->event.pressed) {
                 SEND_STRING("make ergodox_infinity:gabeplaysdrums:dfu-util");
                 if (keycode == MAKE_RIGHT) {
@@ -316,11 +376,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 SEND_STRING(SS_TAP(X_ENTER));
             }
             return false;
+        }
         case CPP_DEREF:
+        {
             if (record->event.pressed) {
                 SEND_STRING("->");
             }
             return false;
+        }
+        case PT_SMART_TOOL:
+        {
+            if (record->event.pressed) {
+                if (my_config.os == OS_WINDOWS) {
+                }
+                else { // my_config.os == OS_MAC
+                    SEND_STRING(SS_DOWN(X_F6) SS_DOWN(X_F7));
+                    wait_ms(100);
+                    SEND_STRING(SS_UP(X_F6) SS_UP(X_F7));
+                }
+            }
+            return false;
+        }
         case OS_TOGGLE:
             if (record->event.pressed) {
                 ++my_config.os;
@@ -615,33 +691,119 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
-void matrix_scan_user(void) {
+// Runs whenever there is a layer state change.
+uint32_t layer_state_set_user(uint32_t state) {
 
+    print("layer_state_set_user\n");
     ergodox_board_led_off();
     ergodox_right_led_1_off();
     ergodox_right_led_2_off();
     ergodox_right_led_3_off();
 
-    if (layer_state & (SYMB << 1))
-    {
-        ergodox_right_led_1_on();
+    uint8_t layer = biton32(state);
+    switch (layer) {
+        case 0:
+            break;
+        case FUNC:
+            ergodox_right_led_3_on();
+            break;
+        case SYMB:
+            ergodox_right_led_2_on();
+            break;
+        default: // any other layer enabled
+            ergodox_right_led_1_on();
+            break;
     }
 
-    if (layer_state & (FUNC << 1))
-    {
-        ergodox_right_led_2_on();
-    }
+    return state;
+};
 
-    // LED #3 doesn't seem to work correctly
-#if 0
-    if (layer_state & (NUMPAD << 1))
-    {
-        ergodox_right_led_3_on();
+void magic_init(void) {
+    // Ensure config values are in valid range
+    if (my_config.magic_layer_index >= (MAGIC_LAYER_MAX - MAGIC_LAYER_MIN)) {
+        my_config.magic_layer_index = 0;
     }
-#endif
-
 }
 
 void matrix_init_user(void) {
     my_config.raw = eeconfig_read_my_config();
+    magic_init();
+    eeconfig_update_my_config(my_config.raw);
+
+    // enable debugging
+    // debug_enable = true;
+}
+
+#define MAGIC_TAPPING_TERM TAPPING_TERM
+
+void matrix_scan_user(void) {
+    matrix_scan_magic();
+}
+
+void matrix_scan_magic(void) {
+    if (my_state.magic_timer != 0 && timer_elapsed(my_state.magic_timer) >= MAGIC_TAPPING_TERM) {
+        // Magic key is being held.  Turn on the layer
+        for (int i = MAGIC_LAYER_MIN; i < MAGIC_LAYER_MAX; i++) {
+            layer_off(i);
+        }
+        my_state.magic_timer = 0;
+        layer_on(MAGIC_LAYER_MIN + my_config.magic_layer_index);
+    }
+}
+
+bool process_record_magic(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case MAGIC:
+        {
+            if (record->event.pressed) {
+                my_state.magic_timer = timer_read();
+            }
+            else {
+                bool was_magic_on = false;
+                for (int i = MAGIC_LAYER_MIN; i < MAGIC_LAYER_MAX; i++) {
+                    was_magic_on = was_magic_on || !!(layer_state & (1ul << i));
+                    layer_off(i);
+                }
+                if (my_state.magic_timer != 0 && timer_elapsed(my_state.magic_timer) < MAGIC_TAPPING_TERM) {
+                    // tapped.  toggle the layer
+                    my_state.magic_timer = 0;
+                    if (!was_magic_on) layer_on(MAGIC_LAYER_MIN + my_config.magic_layer_index);
+                }
+            }
+
+            return false;
+        }
+        case MAGIC_TOGGLE:
+        {
+            if (record->event.pressed) {
+                if (++my_config.magic_layer_index >= (MAGIC_LAYER_MAX - MAGIC_LAYER_MIN)) {
+                    my_config.magic_layer_index = 0;
+                }
+                eeconfig_update_my_config(my_config.raw);
+
+                bool was_magic_on = false;
+                for (int i = MAGIC_LAYER_MIN; i < MAGIC_LAYER_MAX; i++) {
+                    was_magic_on = was_magic_on || !!(layer_state & (1ul << i));
+                    layer_off(i);
+                }
+                if (was_magic_on) {
+                    // turn on the new magic layer
+                    my_state.magic_timer = 0;
+                    layer_on(MAGIC_LAYER_MIN + my_config.magic_layer_index);
+                }
+            }
+
+            return false;
+        }
+        default:
+        {
+            if (my_state.magic_timer != 0) {
+                // magic key is being held.  layer should be on
+                layer_on(MAGIC_LAYER_MIN + my_config.magic_layer_index);
+                my_state.magic_timer = 0;
+            }
+
+            return true;
+        }
+    }
 }
